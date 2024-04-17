@@ -11,9 +11,6 @@ app.use(bodyParser.json());
 
 app.use(cookieParser(process.env.COOKIE_SECRET_KEY));
 
-const { swaggerUi, specs } = require("./swagger/swagger");
-app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(specs));
-
 //Routers
 const realtorRouter = require("./routers/realtorRouter");
 

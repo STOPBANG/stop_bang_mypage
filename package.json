@@ -18,9 +18,5 @@
       "jsonwebtoken": "^9.0.2",
       "mysql2": "^3.9.3",
       "mysql2-promise": "^0.1.4"
-    },
-  "devDependencies": {
-    "swagger-jsdoc": "^6.2.8",
-    "swagger-ui-express": "^5.0.0"
-  }
+    }
   }
