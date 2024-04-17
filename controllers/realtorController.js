@@ -4,6 +4,26 @@ const realtorModel = require("../models/realtorModel.js");
 const tags = require("../public/assets/tag.js");
 const jwt = require("jsonwebtoken");
 
+
+const makeStatistics = (reviews) => {
+  let array = Array.from({ length: 10 }, () => 0);
+  let stArray = new Array(10);
+  reviews.forEach((review) => {
+    if(review.tags !== null) {
+      review.tags.split("").forEach((tag) => {
+        array[parseInt(tag)]++;
+      });
+    }
+  });
+  for (let index = 0; index < array.length; index++) {
+    stArray[index] = { id: index, tag: tags.tags[index], count: array[index] };
+  }
+  stArray.sort((a, b) => {
+    return b.count - a.count;
+  });
+  return stArray;
+};
+
 module.exports = {
 
   mainPage: async (req, res, next) => {
@@ -73,39 +93,6 @@ module.exports = {
         console.error(err.stack);
       }
       next();
-    }
-  },
-
-  realtorView: (req, res) => {
-    res.render("realtor/realtorIndex.ejs");
-  },
-
-  updateBookmark: (req, res) => {
-    if (req.cookies.authToken == undefined)
-      res.render("notFound.ejs", { message: "로그인이 필요합니다" });
-    else {
-      const decoded = jwt.verify(
-        req.cookies.authToken,
-        process.env.JWT_SECRET_KEY
-      );
-      const r_username = decoded.userId;
-      if (r_username === null)
-        res.render("notFound.ejs", { message: "로그인이 필요합니다" });
-      else {
-        let body = {
-          r_username: r_username,
-          raRegno: req.params.ra_regno,
-          isBookmark: req.body.bookmarkData,
-        };
-        realtorModel.updateBookmark(r_username, body, (result, err) => {
-          if (result === null) {
-            console.log("error occured: ", err);
-          } else {
-            console.log(result);
-            res.redirect(`/realtor/${req.params.ra_regno}`);
-          }
-        });
-      }
     }
   }
 };
