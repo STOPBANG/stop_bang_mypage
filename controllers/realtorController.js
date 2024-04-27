@@ -63,7 +63,7 @@ module.exports = {
         // [end] 공인중개사 공공데이터 가져오기
 
         // [start] 공인중개사 개인정보 가져오기
-        postOptions = {
+        getOptions = {
           host: 'stop_bang_auth_DB',
           port: process.env.PORT,
           path: `/db/agent/findByRaRegno/${req.params.ra_regno}`,
@@ -74,7 +74,7 @@ module.exports = {
         }
         requestBody = { username: r_username };
 
-        result = await httpRequest(postOptions, requestBody);
+        result = await httpRequest(getOptions, requestBody);
         if (result.body.length)
           response.agentPrivate = result.body[0];
         else
