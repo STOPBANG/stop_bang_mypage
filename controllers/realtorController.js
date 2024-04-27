@@ -41,21 +41,25 @@ module.exports = {
         // [end] 로그인 계정 정보 가져오기
 
         // [start] 공인중개사 공공데이터 가져오기 -> open api로 고치기
-        const getOptions1 = {
-          host: 'stop_bang_auth_DB',
-          port: process.env.PORT,
-          path: `/db/agentlist/findById/${req.params.ra_regno}`,
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          }
-        }
+        // const getOptions1 = {
+        //   host: 'stop_bang_auth_DB',
+        //   port: process.env.PORT,
+        //   path: `/db/agentlist/findById/${req.params.ra_regno}`,
+        //   method: 'GET',
+        //   headers: {
+        //     'Content-Type': 'application/json',
+        //   }
+        // }
 
-        result = await httpRequest(getOptions1)
-        if (result.body.length)
-          response.agent = result.body[0];
-        else
+        const apiResponse = await fetch(
+          `http://openapi.seoul.go.kr:8088/${process.env.API_KEY}/json/landBizInfo/1/1/${req.params.ra_regno}`
+        );
+        const js = await apiResponse.json();
+
+        if (js.landBizInfo == undefined)
           response.agent = null;
+        else
+          response.agent = js.landBizInfo.row[0];
         // [end] 공인중개사 공공데이터 가져오기
 
         // [start] 공인중개사 개인정보 가져오기
