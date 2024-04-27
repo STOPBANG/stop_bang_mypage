@@ -28,16 +28,16 @@ module.exports = {
 
   mainPage: async (req, res) => {
     //쿠키로부터 로그인 계정 알아오기
-    if (req.cookies.authToken == undefined)
-      res.render("notFound.ejs", { message: "로그인이 필요합니다" });
-    else {
-      const decoded = jwt.verify(
-        req.cookies.authToken,
-        process.env.JWT_SECRET_KEY
-      );
-      let r_username = decoded.userId;
-      if (r_username === null)
-        res.render("notFound.ejs", { message: "로그인이 필요합니다" });
+    // if (req.cookies.authToken == undefined)
+    //   res.render("notFound.ejs", { message: "로그인이 필요합니다" });
+    // else {
+    //   const decoded = jwt.verify(
+    //     req.cookies.authToken,
+    //     process.env.JWT_SECRET_KEY
+    //   );
+    //   let r_username = decoded.userId;
+    //   if (r_username === null)
+    //     res.render("notFound.ejs", { message: "로그인이 필요합니다" });
 
       try {
         const response = {};
@@ -99,36 +99,9 @@ module.exports = {
 
         console.log(response);
         return res.json(response);
-
-        // let getMyReport = await realtorModel.getReport(req.params, r_username);
-        // let statistics;
-        // if(getReviews.length > 0)
-        //   statistics = makeStatistics(getReviews);
-        // let getRating = await realtorModel.getRating(req.params);
-        // getRating = getRating === null ? 0 : getRating;
-
-        // if(who === 1) {
-        //   let getOpened = await realtorModel.getOpenedReview(r_username);
-        //   let canOpen = await realtorModel.canIOpen(r_username);
-        //   let getBookmark = await realtorModel.getBookmarkByIdnRegno(
-        //     req.params.ra_regno,
-        //     r_username
-        //   );
-
-        //   response.openedReviewData = getOpened;
-        //   response.canOpen = canOpen;
-        //   response.bookmark = getBookmark[0][0] ? getBookmark[0][0] : 0;
-        // }
-
-        // if (getRating === null) {
-        //   response.tagsData = null;
-        // } else {
-        //   response.tagsData = tags.tags;
-        // }
       } catch (err) {
         console.error(err.stack);
         return res.json({});
       }
     }
-  },
-};
+  }
