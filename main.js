@@ -28,5 +28,5 @@ app.use(express.urlencoded({ extended: false }));
 app.use("/realtor", realtorRouter);
 
 app.listen(app.get("port"), () => {
-  console.log(app.get("port"), "번 포트에게 대기중");
+  console.log("Realtor_page app listening on port " + app.get("port"));
 });
