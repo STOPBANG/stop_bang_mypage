@@ -30,7 +30,7 @@ module.exports = {
 
       try {
         const response = {};
-        response.r_username = r_username;
+        response.r_username = req.body.r_username;
 
         // [start] 로그인 계정 정보 가져오기
         response.who = req.cookies.userType;
