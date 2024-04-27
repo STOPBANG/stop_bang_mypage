@@ -32,8 +32,9 @@ module.exports = {
           process.env.JWT_SECRET_KEY
         );
         let r_username = decoded.userId;
+        console.log("name: " + r_username);
         const response = {};
-        response.r_username = req.body.r_username;
+        response.r_username = r_username;
 
         // [start] 로그인 계정 정보 가져오기
         response.who = req.cookies.userType;
