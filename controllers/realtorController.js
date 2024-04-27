@@ -25,10 +25,13 @@ const makeStatistics = (reviews) => {
 };
 
 module.exports = {
-
   mainPage: async (req, res) => {
-
       try {
+        const decoded = jwt.verify(
+          req.cookies.authToken,
+          process.env.JWT_SECRET_KEY
+        );
+        let r_username = decoded.userId;
         const response = {};
         response.r_username = req.body.r_username;
 
@@ -36,7 +39,7 @@ module.exports = {
         response.who = req.cookies.userType;
         // [end] 로그인 계정 정보 가져오기
 
-        // [start] 공인중개사 공공데이터 가져오기
+        // [start] 공인중개사 공공데이터 가져오기 -> open api로 고치기
         const getOptions1 = {
           host: 'stop_bang_auth_DB',
           port: process.env.PORT,
