@@ -27,21 +27,9 @@ const makeStatistics = (reviews) => {
 module.exports = {
 
   mainPage: async (req, res) => {
-    //쿠키로부터 로그인 계정 알아오기
-    // if (req.cookies.authToken == undefined)
-    //   res.render("notFound.ejs", { message: "로그인이 필요합니다" });
-    // else {
-    //   const decoded = jwt.verify(
-    //     req.cookies.authToken,
-    //     process.env.JWT_SECRET_KEY
-    //   );
-    //   let r_username = decoded.userId;
-    //   if (r_username === null)
-    //     res.render("notFound.ejs", { message: "로그인이 필요합니다" });
 
       try {
         const response = {};
-
         response.r_username = r_username;
 
         // [start] 로그인 계정 정보 가져오기
