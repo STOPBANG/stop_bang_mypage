@@ -76,44 +76,43 @@ module.exports = {
         }
         requestBody = { username: r_username };
 
-        result = await httpRequest(getOptions, requestBody);
-        if (result.body.length)
-          response.agentPrivate = result.body[0];
-        else
-          response.agentPrivate = null;
-        // [end] 공인중개사 개인정보 가져오기
-
-        // [start] 북마크 정보 가져오기
-        getOptions = {
-          host: 'stop_bang_sub_feature_DB',
-          port: process.env.PORT,
-          path: `/db/bookmark/findAllByIdnRegno/${r_id}/${req.params.ra_regno}`,
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          }
-        }
-        requestBody = { ra_regno: req.params.ra_regno,r_id: r_id };
-
-        result = await httpRequest(getOptions, requestBody);
-        if (result.body.length)
-          response.bookmark = 1;
-        else
-          response.bookmark = 0;
-        // [end] 북마크 정보 가져오기
-
-        // 이부분도 DB 서버와 통신하는 것으로 변경해야 합니다
-        response.rating = 0;
-        response.review = [];
-        response.agentReviewData = [];
-        response.statistics = [];
-        response.report = null;
-        response.openedReviewData = null;
-        response.canOpen = null;
-        response.tagsData = null;
-        response.direction = '';
-
-        return res.json(response);
+        httpRequest(getOptions, requestBody)
+          .then((agentPriRes) => {
+            if (agentPriRes.body.length)
+              response.agentPrivate = agentPriRes.body[0];
+            else
+              response.agentPrivate = null;
+            // [end] 공인중개사 개인정보 가져오기
+            // [start] 북마크 정보 가져오기
+            getBookOptions = {
+              host: 'stop_bang_sub_feature_DB',
+              port: process.env.PORT,
+              path: `/db/bookmark/findAllByIdnRegno/${r_id}/${req.params.ra_regno}`,
+              method: 'GET',
+              headers: {
+                'Content-Type': 'application/json',
+              }
+            }
+            httpRequest(getBookOptions)
+            .then(bookRes => {
+            if (bookRes.body.length)
+              response.bookmark = bookRes.body[0].bm_id;
+            else
+              response.bookmark = 0;
+            // [end] 북마크 정보 가져오기
+            response.rating = 0;
+            response.review = [];
+            response.agentReviewData = [];
+            response.statistics = [];
+            response.report = null;
+            response.openedReviewData = null;
+            response.canOpen = null;
+            response.tagsData = null;
+            response.direction = '';
+    
+            return res.json(response);
+            })
+        });
       } catch (err) {
         console.error(err.stack);
         return res.json({});
