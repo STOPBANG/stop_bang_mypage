@@ -93,7 +93,7 @@ module.exports = {
             'Content-Type': 'application/json',
           }
         }
-        requestBody = { r_id: r_id };
+        requestBody = { ra_regno: req.params.ra_regno,r_id: r_id };
 
         result = await httpRequest(getOptions, requestBody);
         if (result.body.length)
