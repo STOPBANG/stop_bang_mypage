@@ -87,7 +87,7 @@ module.exports = {
         getOptions = {
           host: 'stop_bang_sub_feature_DB',
           port: process.env.PORT,
-          path: `/db/bookmark/findAllByIdnRegno/${req.params.ra_regno}`,
+          path: `/db/bookmark/findAllByIdnRegno/${r_id}/${req.params.ra_regno}`,
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
