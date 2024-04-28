@@ -38,19 +38,21 @@ module.exports = {
 
         // [start] 로그인 계정 정보 가져오기
         response.who = req.cookies.userType;
+        postOptions = {
+          host: 'stop_bang_auth_DB',
+          port: process.env.PORT,
+          path: `/db/resident/findById`,
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          }
+        }
+        let requestBody = {username: r_username};
+        result = await httpRequest(postOptions, requestBody);
+        const r_id = result.body[0].id;
         // [end] 로그인 계정 정보 가져오기
 
         // [start] 공인중개사 공공데이터 가져오기 -> open api로 수정
-        // const getOptions1 = {
-        //   host: 'stop_bang_auth_DB',
-        //   port: process.env.PORT,
-        //   path: `/db/agentlist/findById/${req.params.ra_regno}`,
-        //   method: 'GET',
-        //   headers: {
-        //     'Content-Type': 'application/json',
-        //   }
-        // }
-
         const apiResponse = await fetch(
           `http://openapi.seoul.go.kr:8088/${process.env.API_KEY}/json/landBizInfo/1/1/${req.params.ra_regno}`
         );
@@ -81,6 +83,25 @@ module.exports = {
           response.agentPrivate = null;
         // [end] 공인중개사 개인정보 가져오기
 
+        // [start] 북마크 정보 가져오기
+        getOptions = {
+          host: 'stop_bang_sub_feature_DB',
+          port: process.env.PORT,
+          path: `/db/bookmark/findAllByIdnRegno/${req.params.ra_regno}`,
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          }
+        }
+        requestBody = { r_id: r_id };
+
+        result = await httpRequest(getOptions, requestBody);
+        if (result.body.length)
+          response.bookmark = 1;
+        else
+          response.bookmark = 0;
+        // [end] 북마크 정보 가져오기
+
         // 이부분도 DB 서버와 통신하는 것으로 변경해야 합니다
         response.rating = 0;
         response.review = [];
@@ -90,7 +111,6 @@ module.exports = {
         response.openedReviewData = null;
         response.canOpen = null;
         response.tagsData = null;
-        response.bookmark = 0;
         response.direction = '';
 
         return res.json(response);
