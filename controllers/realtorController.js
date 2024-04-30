@@ -85,7 +85,7 @@ module.exports = {
             // [end] 공인중개사 개인정보 가져오기
             // [start] 북마크 정보 가져오기
             getBookOptions = {
-              host: 'stop_bang_sub_feature_DB',
+              host: 'stop_bang_sub_DB',
               port: process.env.PORT,
               path: `/db/bookmark/findAllByIdnRegno/${r_id}/${req.params.ra_regno}`,
               method: 'GET',
