@@ -100,17 +100,37 @@ module.exports = {
             else
               response.bookmark = 0;
             // [end] 북마크 정보 가져오기
-            response.rating = 0;
-            response.review = [];
-            response.agentReviewData = [];
-            response.statistics = [];
-            response.report = null;
-            response.openedReviewData = null;
-            response.canOpen = null;
-            response.tagsData = null;
-            response.direction = '';
-    
-            return res.json(response);
+            // [start] 리뷰 정보 가져오기
+            getReviewOptions = {
+              host: 'stop_bang_review_DB',
+              port: process.env.PORT,
+              path: `/db/review//findAllByRegno/${req.params.ra_regno}`,
+              method: 'GET',
+              headers: {
+                'Content-Type': 'application/json',
+              }
+            }
+            requestBody = { username: r_username };
+            httpRequest(getReviewOptions)
+            .then(rvRes => {
+              if (rvRes.body.length) {
+                response.review = rvRes.body;
+              }else
+                response.review = [];
+              // [end] 리뷰 정보 가져오기
+
+              response.rating = 0;
+              response.agentReviewData = [];
+              response.statistics = [];
+              response.report = null;
+              response.openedReviewData = null;
+              response.canOpen = null;
+              response.tagsData = null;
+              response.direction = '';
+      
+              return res.json(response);
+
+              })
             })
         });
       } catch (err) {
