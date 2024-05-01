@@ -32,7 +32,6 @@ module.exports = {
         process.env.JWT_SECRET_KEY
       );
       let r_username = decoded.userId;
-      let id = decoded.id;
 
       const response = {};
       response.r_username = r_username;
@@ -176,7 +175,7 @@ module.exports = {
               getOpenedReviewOptions = {
                 host: "stop_bang_sub_DB",
                 port: process.env.PORT,
-                path: `/db/openedReview/findAllById/${id}`,
+                path: `/db/openedReview/findAllById/${r_id}`,
                 method: "GET",
                 headers: {
                   "Content-Type": "application/json",
