@@ -55,7 +55,7 @@ module.exports = {
       // [end] 로그인 계정 정보 가져오기
 
       if (response.rating == null) response.tagsData = null;
-      else response.tagsData = tags.tag;
+      else response.tagsData = tags.tags;
 
       if (r_point < 2) response.canOpen = 0;
       else response.canOpen = 1;
