@@ -32,6 +32,7 @@ module.exports = {
           process.env.JWT_SECRET_KEY
         );
         let r_username = decoded.userId;
+        let id = decoded.id;
 
         const response = {};
         response.r_username = r_username;
@@ -50,6 +51,7 @@ module.exports = {
         let requestBody = {username: r_username};
         result = await httpRequest(postOptions, requestBody);
         const r_id = result.body[0].id;
+        const r_point = result.body[0].r_point;
         // [end] 로그인 계정 정보 가져오기
 
         // [start] 공인중개사 공공데이터 가져오기 -> open api로 수정
@@ -83,35 +85,80 @@ module.exports = {
             else
               response.agentPrivate = null;
             // [end] 공인중개사 개인정보 가져오기
-            // [start] 북마크 정보 가져오기
-            getBookOptions = {
-              host: 'stop_bang_sub_DB',
-              port: process.env.PORT,
-              path: `/db/bookmark/findAllByIdnRegno/${r_id}/${req.params.ra_regno}`,
-              method: 'GET',
-              headers: {
-                'Content-Type': 'application/json',
-              }
-            }
-            httpRequest(getBookOptions)
-            .then(bookRes => {
-            if (bookRes.body.length)
-              response.bookmark = bookRes.body[0].bm_id;
-            else
-              response.bookmark = 0;
-            // [end] 북마크 정보 가져오기
+            // 수정 중
             response.rating = 0;
             response.review = [];
-            response.agentReviewData = [];
-            response.statistics = [];
+            
+            response.agentReviewData = response.review;
+            response.statistics = makeStatistics(response.review);
+            if (response.rating == null)
+              response.tagsData = null;
+            else response.tagsData = tags.tag;
+
+            if (r_point < 2) response.canOpen = 0;
+            else response.canOpen = 1;
+            
+            response.direction = `/review/${req.params.ra_regno}/create`;
             response.report = null;
-            response.openedReviewData = null;
-            response.canOpen = null;
-            response.tagsData = null;
-            response.direction = '';
-    
-            return res.json(response);
+
+            if (response.who == 1){
+              // [start] 북마크 정보 가져오기
+              getBookOptions = {
+                host: 'stop_bang_sub_DB',
+                port: process.env.PORT,
+                path: `/db/bookmark/findAllByIdnRegno/${r_id}/${req.params.ra_regno}`,
+                method: 'GET',
+                headers: {
+                  'Content-Type': 'application/json',
+                }
+              }
+              httpRequest(getBookOptions)
+              .then((bookRes) => {
+              if (bookRes.body.length)
+                response.bookmark = bookRes.body[0].bm_id;
+              else
+                response.bookmark = 0;
+              // [end] 북마크 정보 가져오기
+
+              // [start] 신고 정보 가져오기
+              for(let review of response.review){
+                getBookOptions = {
+                  host: 'stop_bang_sub_DB',
+                  port: process.env.PORT,
+                  path: `/db/report/findOne/${review.rv_id}/${r_username}`,
+                  method: 'GET',
+                  headers: {
+                    'Content-Type': 'application/json',
+                  }
+                }
+                httpRequest(getReportOptions)
+                .then((reportRes) => {
+                  if (reportRes.body.length)
+                    response.report += reportRes.body[0];
+                })
+              }
+              // [end] 신고 정보 가져오기
+              
+              // [start] 후기 열람 여부 가져오기
+              getOpenedReviewOptions = {
+                host: 'stop_bang_sub_DB',
+                port: process.env.PORT,
+                path: `/db/openedReview/findAllById/${id}`,
+                method: 'GET',
+                headers: {
+                  'Content-Type': 'application/json',
+                }
+              }
+              httpRequest(getOpenedReviewOptions)
+              .then((openedReviewRes) => {
+                if (openedReviewRes.body.length)
+                  response.openedReviewData = openedReviewRes.body[0];
+                else response.openedReviewData = null;
+              // [end] 후기 열람 여부 가져오기
+              })
             })
+            return res.json(response);
+          }
         });
       } catch (err) {
         console.error(err.stack);
