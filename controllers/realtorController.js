@@ -132,7 +132,7 @@ module.exports = {
 
               // [start] 신고 정보 가져오기
               for (let review of response.review) {
-                getBookOptions = {
+                getReportOptions = {
                   host: "stop_bang_sub_DB",
                   port: process.env.PORT,
                   path: `/db/report/findOne/${review.rv_id}/${r_username}`,
