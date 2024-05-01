@@ -62,6 +62,8 @@ module.exports = {
 
       response.direction = `/review/${req.params.ra_regno}/create`;
       response.report = null;
+      response.bookmark = 0;
+      response.openedReviewData = null;
 
       // [start] 공인중개사 공공데이터 가져오기 -> open api로 수정
       const apiResponse = await fetch(
@@ -125,7 +127,7 @@ module.exports = {
             httpRequest(getBookOptions).then((bookRes) => {
               if (bookRes.body.length)
                 response.bookmark = bookRes.body[0].bm_id;
-              else response.bookmark = 0;
+              // else response.bookmark = 0;
               // [end] 북마크 정보 가져오기
 
               // [start] 신고 정보 가져오기
@@ -159,7 +161,7 @@ module.exports = {
               httpRequest(getOpenedReviewOptions).then((openedReviewRes) => {
                 if (openedReviewRes.body.length)
                   response.openedReviewData = openedReviewRes.body[0];
-                else response.openedReviewData = null;
+                // else response.openedReviewData = null;
                 // [end] 후기 열람 여부 가져오기
               });
             });
