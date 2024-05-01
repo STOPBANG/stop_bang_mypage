@@ -163,11 +163,13 @@ module.exports = {
                   response.openedReviewData = openedReviewRes.body[0];
                 // else response.openedReviewData = null;
                 // [end] 후기 열람 여부 가져오기
+
+                return res.json(response);
               });
             });
           }
         });
-        return res.json(response);
+        
       });
     } catch (err) {
       console.error(err.stack);
