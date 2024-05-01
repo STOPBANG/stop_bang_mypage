@@ -113,6 +113,30 @@ module.exports = {
           response.agentReviewData = response.review;
           response.statistics = makeStatistics(response.review);
 
+          // [start] 평균 평점 정보 가져오기
+          console.log("rvres의 body is : "+JSON.stringify(rvRes.body));
+          
+          let reviewCount = rvRes.body.length;
+          console.log("reviewCount is :  "+ reviewCount);
+
+          if (reviewCount > 0){
+            let ratingSum = 0;
+
+            for (let review of rvRes.body){
+              ratingSum += review.rating
+              console.log("ratingsum is : "+ ratingSum)
+            }              
+            console.log("avg is "+ ratingSum/reviewCount);
+
+            response.rating = (ratingSum/reviewCount);
+            console.log(response.rating);
+
+          }
+          else{
+            response.rating = 0 ;
+          }
+          // [end] 평균 평점 정보 가져오기
+          
           if (response.who == 1) {
             // [start] 북마크 정보 가져오기
             getBookOptions = {
