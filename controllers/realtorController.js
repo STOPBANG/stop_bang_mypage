@@ -64,6 +64,7 @@ module.exports = {
       response.report = null;
       response.bookmark = 0;
       response.openedReviewData = null;
+      response.review = []
 
       // [start] 공인중개사 공공데이터 가져오기 -> open api로 수정
       const apiResponse = await fetch(
@@ -107,7 +108,6 @@ module.exports = {
         requestBody = { username: r_username };
         httpRequest(getReviewOptions).then((rvRes) => {
           if (rvRes.body.length) response.review = rvRes.body;
-          else response.review = [];
           // [end] 리뷰 정보 가져오기
 
           response.agentReviewData = response.review;
