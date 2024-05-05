@@ -37,6 +37,7 @@ module.exports = {
       response.r_username = r_username;
 
       // [start] 로그인 계정 정보 가져오기
+      // 공인중개사가 다른 부동산 페이지에 접근할 수도 있으므로 /db/agent/findById 요청도 필요합니다
       response.who = req.cookies.userType;
       postOptions = {
         host: "stop_bang_auth_DB",
@@ -49,6 +50,7 @@ module.exports = {
       };
       let requestBody = { username: r_username };
       result = await httpRequest(postOptions, requestBody);
+      // result.body[0] 이 undefined인 경우도 처리 필요합니다
       const r_id = result.body[0].id;
       const r_point = result.body[0].r_point;
       // [end] 로그인 계정 정보 가져오기
