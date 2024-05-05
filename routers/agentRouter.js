@@ -9,7 +9,7 @@ router.use((req, res, next) => {
     next();
   });
 
-router.get("/:id", agentController.agentProfile);
+router.get("/:ra_regno", agentController.agentProfile);
 
 router.get("/:id/info_edit", agentController.updateMainInfo);
 
