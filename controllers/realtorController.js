@@ -32,14 +32,15 @@ module.exports = {
         process.env.JWT_SECRET_KEY
       );
       let r_username = decoded.userId;
-
+      let r_id = null;
+      let r_point = null;
       const response = {};
       response.r_username = r_username;
 
       // [start] 로그인 계정 정보 가져오기
-      // 공인중개사가 다른 부동산 페이지에 접근할 수도 있으므로 /db/agent/findById 요청도 필요합니다
       response.who = req.cookies.userType;
-      postOptions = {
+      // resident인 경우
+      postResidentOptions = {
         host: "stop_bang_auth_DB",
         port: process.env.PORT,
         path: `/db/resident/findById`,
@@ -49,10 +50,31 @@ module.exports = {
         },
       };
       let requestBody = { username: r_username };
-      result = await httpRequest(postOptions, requestBody);
-      // result.body[0] 이 undefined인 경우도 처리 필요합니다
-      const r_id = result.body[0].id;
-      const r_point = result.body[0].r_point;
+      residentResult = await httpRequest(postResidentOptions, requestBody);
+      // result.body[0]가 undefined인 경우
+      if (residentResult.body.length){
+        r_id = residentResult.body[0].id;
+        r_point = residentResult.body[0].r_point;
+      }
+      else{
+        // agent인 경우 (resident가 아니라면)
+        postAgentOptions = {
+          host: "stop_bang_auth_DB",
+          port: process.env.PORT,
+          path: `/db/agent/findById`,
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        };
+        let requestBody = { username: r_username };
+        agentResult = await httpRequest(postAgentOptions, requestBody);
+        // result.body[0]가 undefined인 경우
+        if (agentResult.body.length){
+          r_id = agentResult.body[0].id;
+          r_point = agentResult.body[0].r_point;
+        }
+      }
       // [end] 로그인 계정 정보 가져오기
 
       if (response.rating == null) response.tagsData = null;
