@@ -214,8 +214,8 @@ module.exports = {
                 return res.json(response);
               });
             });
-            return res.json(response);
           }
+          return res.json(response);
         });
       });
     } catch (err) {
