@@ -215,7 +215,7 @@ module.exports = {
               });
             });
           }
-          return res.json(response);
+          else return res.json(response);
         });
       });
     } catch (err) {
