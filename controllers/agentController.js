@@ -3,8 +3,24 @@ const tags = require("../public/assets/tag.js");
 const jwt = require("jsonwebtoken");
 const { httpRequest } = require('../utils/httpRequest.js');
 
-// gcp bucket
+const makeStatistics = (reviews) => {
+    let array = Array.from({ length: 10 }, () => 0);
+    let stArray = new Array(10);
+    reviews.forEach((review) => {
+      review.tags.split("").forEach((tag) => {
+        array[parseInt(tag)]++;
+      });
+    });
+    for (let index = 0; index < array.length; index++) {
+      stArray[index] = { id: index, tag: tags.tags[index], count: array[index] };
+    }
+    stArray.sort((a, b) => {
+      return b.count - a.count;
+    });
+    return stArray;
+  };
 
+// gcp bucket
 const GCP_PROJECT_ID = process.env.GCP_PROJECT_ID;
 const GCP_KEYFILE_PATH = process.env.GCP_KEYFILE_PATH;
 const GCP_BUCKET_NAME = process.env.GCP_BUCKET_NAME;
@@ -36,6 +52,11 @@ module.exports = {
         const ra_regno = req.params.ra_regno;
         const response = {};
         try {
+            const decoded = jwt.verify(
+                req.cookies.authToken,
+                process.env.JWT_SECRET_KEY
+              );
+            let a_username = decoded.userId;
             const getProfileOptions = {
                 host: 'stop_bang_auth_DB',
                 port: process.env.PORT,
@@ -47,6 +68,11 @@ module.exports = {
               }
               httpRequest(getProfileOptions)
               .then(async (profileRes) => {
+                // 공인중개사 계정으로 로그인되지 않은 경우 처리 + 다른 공인중개사 페이지 접근 제한
+                if (profileRes == undefined) 
+                    return res.json({});
+                else if (profileRes.body[0].a_username == a_username)
+                    return res.json({})
                 const apiResponse = await fetch(
                     `http://openapi.seoul.go.kr:8088/${process.env.API_KEY}/json/landBizInfo/1/1/${ra_regno}/`
                   );
@@ -69,38 +95,40 @@ module.exports = {
                     response.a_profile_image = bucket.file(`agent/${profileImage}`).publicUrl();
                 }
 
-                response.agentRating = null;
+                // 초기화
+                response.agentRating = 0; // default (통신 추가해야함)
+                response.tagsData = null; // default (통신 추가해야함)
+
                 response.agentReviewData = [];
                 response.report = null;
                 response.statistics = null;
-                response.tagsData = null;
+
+                // [start] 리뷰 정보 가져오기
+                getReviewOptions = {
+                    host: "stop_bang_review_DB",
+                    port: process.env.PORT,
+                    path: `/db/review/findAllByRegno/${req.params.ra_regno}`,
+                    method: "GET",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                };
+                requestBody = { username: a_username };
+                httpRequest(getReviewOptions).then((rvRes) => {
+                if (rvRes.body.length) response.agentReviewData = rvRes.body;
+                // [end] 리뷰 정보 가져오기
+                response.statistics = makeStatistics(response.agentReviewData);
+
+                // rating 값 생기면 수정
+                // response.agentRating = "가져온 값";
+                // response.tagsData = tags.tags;
                 return res.json(response);
               })
-        // let agent = await agentModel.getAgentProfile(req.params.id);
-        // let getMainInfo = await agentModel.getMainInfo(req.params.id);
-        
-
-        // if (getMainInfo.a_username !== decoded.userId) // main으로 통신 보낼 때 확인 
-            // res.render('notFound.ejs', {message: "접근이 제한되었습니다. 공인중개사 계정으로 로그인하세요"});
-        // let getEnteredAgent = await agentModel.getEnteredAgent(req.params.id);
-        // let getReviews = await agentModel.getReviewByRaRegno(req.params.id);
+            })
         // let getReport = await agentModel.getReport(req.params.id, decoded.userId);
         // let getRating = await agentModel.getRating(req.params.id);
-        // let statistics = makeStatistics(getReviews);
-        // res.locals.agent = agent[0];
-        // res.locals.agentMainInfo = getMainInfo;
         // res.locals.agentSubInfo = getEnteredAgent[0][0];
-        // res.locals.agentReviewData = getReviews;
         // res.locals.report = getReport;
-        // res.locals.statistics = statistics;
-
-        // if (getRating === null) {
-        //     res.locals.agentRating = 0;
-        //     res.locals.tagsData = null;
-        // } else {
-        //     res.locals.agentRating = getRating;
-        //     res.locals.tagsData = tags.tags;
-        // }
         } catch (err) {
             console.error(err.stack);
         }

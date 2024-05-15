@@ -117,7 +117,7 @@ module.exports = {
         else response.agentPrivate = null;
         // [end] 공인중개사 개인정보 가져오기
 
-        response.rating = 0; // 수정 중
+        response.rating = 0;
         // [start] 리뷰 정보 가져오기
         getReviewOptions = {
           host: "stop_bang_review_DB",
