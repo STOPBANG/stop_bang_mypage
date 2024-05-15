@@ -170,6 +170,31 @@ module.exports = {
 
     updatingMainInfo: (req, res, next) => {
         response = {};
+        let i = 1;
+        let filename = '';
+        /* gcs */
+        for(file of req.files){
+            const date = new Date();
+            const fileTime = date.getTime();
+            filename = `${fileTime}-${file.originalname}-image${i}`;
+            console.log(filename);
+            const gcsFileDir = `agent/${filename}`;
+            // gcs에 agent 폴더 밑에 파일이 저장
+            const blob = bucket.file(gcsFileDir);
+            const blobStream = blob.createWriteStream();
+
+            blobStream.on('finish', () => {
+            console.log('gcs upload successed');
+            });
+
+            blobStream.on('error', (err) => {
+            console.log(err);
+            });
+
+            blobStream.end(req.file.buffer);
+            req.files.append({filenum : i, filename : filename});
+            i++;
+        }
         /* msa */
         const putUpdatingMainInfoOptions = {
             host: 'stop_bang_auth_DB',
@@ -185,17 +210,7 @@ module.exports = {
         .then(updatingMainInfoResult => { 
             return res.json(updatingMainInfoResult);
         })
-        //
-        // agentModel.updateMainInfo(req.params.id, req.files, req.body, () => {
-        // if (res === null) {
-        //     if (error === "imageError") {
-        //     res.render('notFound.ejs', {message: "이미지 크기가 너무 큽니다. 다른 사이즈로 시도해주세요."})
-        //     }
-        // } else {
-        //     res.locals.redirect = `/agent/${req.params.id}`;
-        //     next();
-        // }
-        // });
+
     },
 
     updateEnteredInfo: async (req, res) => {
