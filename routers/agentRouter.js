@@ -13,11 +13,11 @@ router.get("/:ra_regno", agentController.agentProfile);
 
 router.get("/:ra_regno/info_edit", agentController.updateMainInfo);
 
-// router.post(
-//     "/:id/edit_process",
-//     agentController.upload.fields([{name: 'myImage1'}, {name: 'myImage2'}, {name: 'myImage3'}]),
-//     agentController.updatingMainInfo,
-// );
+router.post(
+    "/:ra_regno/edit_process",
+    agentController.upload.fields([{name: 'myImage1'}, {name: 'myImage2'}, {name: 'myImage3'}]),
+    agentController.updatingMainInfo,
+);
 
 router.get("/:id/entered_info_process", agentController.updateEnteredInfo);
 
