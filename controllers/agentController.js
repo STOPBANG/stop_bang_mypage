@@ -49,13 +49,13 @@ function jsonKeyLowerCase(object){
 }
 
 module.exports = {
-    upload: multer({
-        storage: multer.memoryStorage(),
-        limits: { fileSize: 10 * 1024 * 1024 },
-        fileFilter: function (req, file, cb) {
-          checkFileType(file, cb);
-        },
-      }),
+    // upload: multer({
+    //     storage: multer.memoryStorage(),
+    //     limits: { fileSize: 10 * 1024 * 1024 },
+    //     fileFilter: function (req, file, cb) {
+    //       checkFileType(file, cb);
+    //     },
+    //   }),
       
     agentProfile: async (req, res, next) => {
         const ra_regno = req.params.ra_regno;
