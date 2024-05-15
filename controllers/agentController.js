@@ -214,21 +214,24 @@ module.exports = {
     },
 
     updateEnteredInfo: async (req, res) => {
-        let getEnteredAgent = await agentModel.getEnteredAgent(req.params.id);
+        response = {};
+        /* msa */
+        const getUpdateEnteredInfoOptions = {
+            host: 'stop_bang_auth_DB',
+            port: process.env.PORT,
+            path: `/db/agent/findByRaRegno/${req.params.ra_regno}`,
+            method: 'GET',
+            headers: {
+                "Content-Type": "application/json",
+            },
+        }
+        httpRequest(getUpdateEnteredInfoOptions)
+            .then(updateEnteredInfoResult => {
+                response.profileImage = updateEnteredInfoResult.body[0].a_profile_image;
+                response.officeHourS = updateEnteredInfoResult.body[0].a_office_hours;
 
-        let profileImage = getEnteredAgent[0][0].a_profile_image;
-        console.log(getEnteredAgent[0]);
-        let officeHour = getEnteredAgent[0][0].a_office_hours;
-        let hours = officeHour != null ? officeHour.split(' ') : null;
-
-        let title = `부동산 정보 수정하기`;
-        res.render("agent/updateAgentInfo.ejs", {
-        title: title,
-        agentId: req.params.id,
-        profileImage: profileImage,
-        officeHourS: hours != null ? hours[0] : null,
-        officeHourE: hours != null ? hours[2] : null
-        });
+                return res.json(response);
+            })
     },
 
     updatingEnteredInfo: (req, res, next) => {
