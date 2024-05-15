@@ -136,22 +136,29 @@ module.exports = {
     },
 
     updateMainInfo: async (req, res) => {
-        let getMainInfo = await agentModel.getMainInfo(req.params.id);
+        response = {};
+        /* msa */
+        const getUpdateMainInfoOptions = {
+            host: 'stop_bang_auth_DB',
+            port: process.env.MS_PORT,
+            path: `/findByRaRegno/${req.params.ra_regno}`,
+            method: 'GET',
+            headers: {
+            ...
+                req.headers,
+            auth: res.locals.auth
+            }
+        }
+        httpRequest(getUpdateMainInfoOptions)
+        .then(updateMainInfoResult => {
 
-        let image1 = getMainInfo.a_image1;
-        let image2 = getMainInfo.a_image2;
-        let image3 = getMainInfo.a_image3;
-        let introduction = getMainInfo.a_introduction;
-        
-        let title = `소개글 수정하기`;
-        res.render("agent/updateMainInfo.ejs", {
-            title: title,
-            agentId: req.params.id,
-            image1: image1,
-            image2: image2,
-            image3: image3,
-            introduction: introduction,
-        });
+            response.image1 = updateMainInfoResult.body[0].a_image1;
+            response.image2 = updateMainInfoResult.body[0].a_image2;
+            response.image3 = updateMainInfoResult.body[0].a_image3;
+            response.introduction = updateMainInfoResult.body[0].a_introduction;
+            
+            return res.json(response);
+        })
     },
 
     updatingMainInfo: (req, res, next) => {
