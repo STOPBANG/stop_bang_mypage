@@ -52,11 +52,11 @@ module.exports = {
         const ra_regno = req.params.ra_regno;
         const response = {};
         try {
-            const decoded = jwt.verify(
-                req.cookies.authToken,
-                process.env.JWT_SECRET_KEY
-              );
-            let a_username = decoded.userId;
+            // const decoded = jwt.verify(
+            //     req.cookies.authToken,
+            //     process.env.JWT_SECRET_KEY
+            //   );
+            // let a_username = decoded.userId;
             const getProfileOptions = {
                 host: 'stop_bang_auth_DB',
                 port: process.env.PORT,
@@ -69,6 +69,8 @@ module.exports = {
               httpRequest(getProfileOptions)
               .then(async (profileRes) => {
                 // 공인중개사 계정으로 로그인되지 않은 경우 처리 + 다른 공인중개사 페이지 접근 제한
+                let a_username = req.headers.auth;
+                console.log(a_username);
                 if (profileRes == undefined) 
                     return res.json({});
                 else if (profileRes.body[0].a_username == a_username)
