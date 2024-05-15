@@ -2,6 +2,7 @@ const e = require("express");
 const tags = require("../public/assets/tag.js");
 const jwt = require("jsonwebtoken");
 const { httpRequest } = require('../utils/httpRequest.js');
+const multer = require("multer");
 
 const makeStatistics = (reviews) => {
     let array = Array.from({ length: 10 }, () => 0);
@@ -48,6 +49,14 @@ function jsonKeyLowerCase(object){
 }
 
 module.exports = {
+    upload: multer({
+        storage: multer.memoryStorage(),
+        limits: { fileSize: 10 * 1024 * 1024 },
+        fileFilter: function (req, file, cb) {
+          checkFileType(file, cb);
+        },
+      }),
+      
     agentProfile: async (req, res, next) => {
         const ra_regno = req.params.ra_regno;
         const response = {};
@@ -136,35 +145,57 @@ module.exports = {
     },
 
     updateMainInfo: async (req, res) => {
-        let getMainInfo = await agentModel.getMainInfo(req.params.id);
+        response = {};
+        /* msa */
+        const getUpdateMainInfoOptions = {
+            host: 'stop_bang_auth_DB',
+            port: process.env.PORT,
+            path: `/db/agent/findByRaRegno/${req.params.ra_regno}`,
+            method: 'GET',
+            headers: {
+                "Content-Type": "application/json",
+            },
+        }
+        httpRequest(getUpdateMainInfoOptions)
+        .then(updateMainInfoResult => {
 
-        let image1 = getMainInfo.a_image1;
-        let image2 = getMainInfo.a_image2;
-        let image3 = getMainInfo.a_image3;
-        let introduction = getMainInfo.a_introduction;
-        
-        let title = `소개글 수정하기`;
-        res.render("agent/updateMainInfo.ejs", {
-            title: title,
-            agentId: req.params.id,
-            image1: image1,
-            image2: image2,
-            image3: image3,
-            introduction: introduction,
-        });
+            response.image1 = updateMainInfoResult.body[0].a_image1;
+            response.image2 = updateMainInfoResult.body[0].a_image2;
+            response.image3 = updateMainInfoResult.body[0].a_image3;
+            response.introduction = updateMainInfoResult.body[0].a_introduction;
+            
+            return res.json(response);
+        })
     },
 
     updatingMainInfo: (req, res, next) => {
-        agentModel.updateMainInfo(req.params.id, req.files, req.body, () => {
-        if (res === null) {
-            if (error === "imageError") {
-            res.render('notFound.ejs', {message: "이미지 크기가 너무 큽니다. 다른 사이즈로 시도해주세요."})
-            }
-        } else {
-            res.locals.redirect = `/agent/${req.params.id}`;
-            next();
-        }
-        });
+        response = {};
+        /* msa */
+        const putUpdatingMainInfoOptions = {
+            host: 'stop_bang_auth_DB',
+            port: process.env.PORT,
+            path: `/db/agent/updateImage`,
+            method: 'PUT',
+            headers: {
+                "Content-Type": "application/json",
+            },
+        };
+        let requestBody = { files: req.files, introduction: req.body.introduction, sys_regno: req.body.sys_regno};
+        httpRequest(putUpdatingMainInfoOptions, requestBody)
+        .then(updatingMainInfoResult => { 
+            return res.json(updatingMainInfoResult);
+        })
+        //
+        // agentModel.updateMainInfo(req.params.id, req.files, req.body, () => {
+        // if (res === null) {
+        //     if (error === "imageError") {
+        //     res.render('notFound.ejs', {message: "이미지 크기가 너무 큽니다. 다른 사이즈로 시도해주세요."})
+        //     }
+        // } else {
+        //     res.locals.redirect = `/agent/${req.params.id}`;
+        //     next();
+        // }
+        // });
     },
 
     updateEnteredInfo: async (req, res) => {
