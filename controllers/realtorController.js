@@ -149,7 +149,6 @@ module.exports = {
           httpRequest(getRatingOptions).then((rtRes) => {
             if(rtRes.body) { 
               response.rating = rtRes.body['avg'];
-              console.log("im here yesbody")
             }
             else{
               response.rating = 0;
