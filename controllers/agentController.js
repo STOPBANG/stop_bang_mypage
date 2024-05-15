@@ -71,10 +71,6 @@ module.exports = {
                 // 공인중개사 계정으로 로그인되지 않은 경우 처리 + 다른 공인중개사 페이지 접근 제한
                 let a_username = req.headers.auth;
                 console.log(a_username);
-                if (profileRes == undefined) 
-                    return res.json({});
-                else if (profileRes.body[0].a_username == a_username)
-                    return res.json({})
                 const apiResponse = await fetch(
                     `http://openapi.seoul.go.kr:8088/${process.env.API_KEY}/json/landBizInfo/1/1/${ra_regno}/`
                   );
@@ -104,6 +100,10 @@ module.exports = {
                 response.agentReviewData = [];
                 response.report = null;
                 response.statistics = null;
+                if (profileRes == undefined) 
+                    return res.json({});
+                else if (profileRes.body[0].a_username != a_username)
+                    return res.json({});
 
                 // [start] 리뷰 정보 가져오기
                 getReviewOptions = {
