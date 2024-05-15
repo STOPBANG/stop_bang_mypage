@@ -49,13 +49,13 @@ function jsonKeyLowerCase(object){
 }
 
 module.exports = {
-    // upload: multer({
-    //     storage: multer.memoryStorage(),
-    //     limits: { fileSize: 10 * 1024 * 1024 },
-    //     fileFilter: function (req, file, cb) {
-    //       checkFileType(file, cb);
-    //     },
-    //   }),
+    upload: multer({
+        storage: multer.memoryStorage(),
+        limits: { fileSize: 10 * 1024 * 1024 },
+        fileFilter: function (req, file, cb) {
+          checkFileType(file, cb);
+        },
+      }),
       
     agentProfile: async (req, res, next) => {
         const ra_regno = req.params.ra_regno;
@@ -191,8 +191,8 @@ module.exports = {
             console.log(err);
             });
 
-            blobStream.end(req.file.buffer);
-            req.files.append({filenum : i, filename : filename});
+            blobStream.end(file.buffer);
+            req.body.files.append({filenum : i, filename : filename});
             i++;
         }
         /* msa */
@@ -205,7 +205,7 @@ module.exports = {
                 "Content-Type": "application/json",
             },
         };
-        let requestBody = { files: req.files, introduction: req.body.introduction, sys_regno: req.body.sys_regno};
+        let requestBody = { files: req.body.files, introduction: req.body.introduction, sys_regno: req.body.sys_regno};
         httpRequest(putUpdatingMainInfoOptions, requestBody)
         .then(updatingMainInfoResult => { 
             return res.json(updatingMainInfoResult);
