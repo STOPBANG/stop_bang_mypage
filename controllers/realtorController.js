@@ -122,7 +122,7 @@ module.exports = {
         getReviewOptions = {
           host: "stop_bang_review_DB",
           port: process.env.PORT,
-          path: `/db/review//findAllByRegno/${req.params.ra_regno}`,
+          path: `/db/review/findAllByRegno/${req.params.ra_regno}`,
           method: "GET",
           headers: {
             "Content-Type": "application/json",
