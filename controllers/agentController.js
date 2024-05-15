@@ -144,10 +144,8 @@ module.exports = {
             path: `/db/agent/findByRaRegno/${req.params.ra_regno}`,
             method: 'GET',
             headers: {
-            ...
-                req.headers,
-            auth: res.locals.auth
-            }
+                "Content-Type": "application/json",
+            },
         }
         httpRequest(getUpdateMainInfoOptions)
         .then(updateMainInfoResult => {
