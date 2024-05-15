@@ -11,7 +11,7 @@ router.use((req, res, next) => {
 
 router.get("/:ra_regno", agentController.agentProfile);
 
-router.get("/:sys_regno/info_edit", agentController.updateMainInfo);
+router.get("/:ra_regno/info_edit", agentController.updateMainInfo);
 
 // router.post(
 //     "/:id/edit_process",
