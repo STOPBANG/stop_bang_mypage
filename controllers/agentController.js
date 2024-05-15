@@ -2,6 +2,7 @@ const e = require("express");
 const tags = require("../public/assets/tag.js");
 const jwt = require("jsonwebtoken");
 const { httpRequest } = require('../utils/httpRequest.js');
+const multer = require("multer");
 
 const makeStatistics = (reviews) => {
     let array = Array.from({ length: 10 }, () => 0);
