@@ -140,7 +140,7 @@ module.exports = {
         /* msa */
         const getUpdateMainInfoOptions = {
             host: 'stop_bang_auth_DB',
-            port: process.env.MS_PORT,
+            port: process.env.PORT,
             path: `/db/agent/findByRaRegno/${req.params.ra_regno}`,
             method: 'GET',
             headers: {
