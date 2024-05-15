@@ -70,7 +70,6 @@ module.exports = {
               .then(async (profileRes) => {
                 // 공인중개사 계정으로 로그인되지 않은 경우 처리 + 다른 공인중개사 페이지 접근 제한
                 let a_username = req.headers.auth;
-                console.log(a_username);
                 const apiResponse = await fetch(
                     `http://openapi.seoul.go.kr:8088/${process.env.API_KEY}/json/landBizInfo/1/1/${ra_regno}/`
                   );
@@ -100,6 +99,7 @@ module.exports = {
                 response.agentReviewData = [];
                 response.report = null;
                 response.statistics = null;
+                console.log(profileRes.body[0]);
                 if (profileRes == undefined) 
                     return res.json({});
                 else if (profileRes.body[0].a_username != a_username)
@@ -129,7 +129,6 @@ module.exports = {
             })
         // let getReport = await agentModel.getReport(req.params.id, decoded.userId);
         // let getRating = await agentModel.getRating(req.params.id);
-        // res.locals.agentSubInfo = getEnteredAgent[0][0];
         // res.locals.report = getReport;
         } catch (err) {
             console.error(err.stack);
