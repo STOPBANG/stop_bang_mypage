@@ -34,6 +34,22 @@ const storage = new Storage({
 });
 const bucket = storage.bucket(GCP_BUCKET_NAME);
 
+// Check File Type
+function checkFileType(file, cb) {
+    // Allowed ext
+    const filetypes = /jpeg|jpg|png/;
+    // Check ext
+    const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
+    // Check mime
+    const mimetype = filetypes.test(file.mimetype);
+  
+    if (mimetype && extname) {
+      return cb(null, true);
+    } else {
+      cb("Error: Images Only!");
+    }
+  }
+
 function jsonKeyLowerCase(object){
     if(Array.isArray(object)){
     // 리스트<맵> 형식으로 넘어오는 경우 처리
@@ -169,32 +185,35 @@ module.exports = {
     },
 
     updatingMainInfo: (req, res, next) => {
+        console.log(req.body);
+        // console.log(req.body.files);
+
         response = {};
-        let i = 1;
-        let filename = '';
+        // let i = 1;
+        // let filename = '';
         /* gcs */
-        for(file of req.files){
-            const date = new Date();
-            const fileTime = date.getTime();
-            filename = `${fileTime}-${file.originalname}-image${i}`;
-            console.log(filename);
-            const gcsFileDir = `agent/${filename}`;
-            // gcs에 agent 폴더 밑에 파일이 저장
-            const blob = bucket.file(gcsFileDir);
-            const blobStream = blob.createWriteStream();
+        // for(file of req.body.files){
+        //     const date = new Date();
+        //     const fileTime = date.getTime();
+        //     filename = `${fileTime}-${file.originalname}-image${i}`;
+        //     console.log(filename);
+        //     const gcsFileDir = `agent/${filename}`;
+        //     // gcs에 agent 폴더 밑에 파일이 저장
+        //     const blob = bucket.file(gcsFileDir);
+        //     const blobStream = blob.createWriteStream();
 
-            blobStream.on('finish', () => {
-            console.log('gcs upload successed');
-            });
+        //     blobStream.on('finish', () => {
+        //     console.log('gcs upload successed');
+        //     });
 
-            blobStream.on('error', (err) => {
-            console.log(err);
-            });
+        //     blobStream.on('error', (err) => {
+        //     console.log(err);
+        //     });
 
-            blobStream.end(file.buffer);
-            req.body.files.append({filenum : i, filename : filename});
-            i++;
-        }
+        //     blobStream.end(file.buffer);
+        //     req.body.files.append({filenum : i, filename : filename});
+        //     i++;
+        // }
         /* msa */
         const putUpdatingMainInfoOptions = {
             host: 'stop_bang_auth_DB',
@@ -214,24 +233,21 @@ module.exports = {
     },
 
     updateEnteredInfo: async (req, res) => {
-        response = {};
-        /* msa */
-        const getUpdateEnteredInfoOptions = {
-            host: 'stop_bang_auth_DB',
-            port: process.env.PORT,
-            path: `/db/agent/findByRaRegno/${req.params.ra_regno}`,
-            method: 'GET',
-            headers: {
-                "Content-Type": "application/json",
-            },
-        }
-        httpRequest(getUpdateEnteredInfoOptions)
-            .then(updateEnteredInfoResult => {
-                response.profileImage = updateEnteredInfoResult.body[0].a_profile_image;
-                response.officeHourS = updateEnteredInfoResult.body[0].a_office_hours;
+        let getEnteredAgent = await agentModel.getEnteredAgent(req.params.id);
 
-                return res.json(response);
-            })
+        let profileImage = getEnteredAgent[0][0].a_profile_image;
+        console.log(getEnteredAgent[0]);
+        let officeHour = getEnteredAgent[0][0].a_office_hours;
+        let hours = officeHour != null ? officeHour.split(' ') : null;
+
+        let title = `부동산 정보 수정하기`;
+        res.render("agent/updateAgentInfo.ejs", {
+        title: title,
+        agentId: req.params.id,
+        profileImage: profileImage,
+        officeHourS: hours != null ? hours[0] : null,
+        officeHourE: hours != null ? hours[2] : null
+        });
     },
 
     updatingEnteredInfo: (req, res, next) => {
