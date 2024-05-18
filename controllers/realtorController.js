@@ -75,6 +75,7 @@ module.exports = {
           r_point = agentResult.body[0].r_point;
         }
       }
+      response.r_id = r_id;
       // [end] 로그인 계정 정보 가져오기
 
       if (response.rating == null) response.tagsData = null;
@@ -139,6 +140,20 @@ module.exports = {
               const rv_id = review.id;
         
               try {
+                // 리뷰를 작성한 사용자의 username 가져오기
+                const postUsernameOPtions = {
+                  host: "stop_bang_auth_DB",
+                  port: process.env.PORT,
+                  path: `/db/resident/findByPk`,
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                  },
+                };
+                const requestBody = {resident_r_id: review.resident_r_id};
+                const review_username = await httpRequest(postUsernameOPtions, requestBody)
+                review.username=review_username.body[0].r_username;
+                
                 const reportCheckRes = await httpRequest({
                   host: "stop_bang_review",
                   port: process.env.PORT,
@@ -189,6 +204,9 @@ module.exports = {
             }
           // [end] 평균 평점 정보 가져오기
           });
+
+          if (response.rating == null) response.tagsData = null;
+          else response.tagsData = tags.tags;
           
           if (response.who == 1) {
             // [start] 북마크 정보 가져오기
