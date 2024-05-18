@@ -34,6 +34,22 @@ const storage = new Storage({
 });
 const bucket = storage.bucket(GCP_BUCKET_NAME);
 
+// Check File Type
+function checkFileType(file, cb) {
+    // Allowed ext
+    const filetypes = /jpeg|jpg|png/;
+    // Check ext
+    const extname = filetypes.test(path.extname(file.originalname).toLowerCase());
+    // Check mime
+    const mimetype = filetypes.test(file.mimetype);
+  
+    if (mimetype && extname) {
+      return cb(null, true);
+    } else {
+      cb("Error: Images Only!");
+    }
+  }
+
 function jsonKeyLowerCase(object){
     if(Array.isArray(object)){
     // 리스트<맵> 형식으로 넘어오는 경우 처리
@@ -100,100 +116,99 @@ module.exports = {
                 response.a_profile_image = bucket.file(`agent/${profileImage}`).publicUrl();
                 }
 
-                // 초기화
-                response.agentRating = 0; // default (통신 추가해야함)
-                response.tagsData = null; // default (통신 추가해야함)
+              // 초기화
+            response.agentRating = 0; // default (통신 추가해야함)
+            response.tagsData = null; // default (통신 추가해야함)
+            response.agentReviewData = [];
+            response.report = null;
+            response.statistics = null;
+            console.log(profileRes.body[0]);
+            if (profileRes == undefined)
+            return res.json({});
+            else if (profileRes.body[0].a_username != a_username)
+            return res.json({});
 
-                response.agentReviewData = [];
-                response.report = null;
-                response.statistics = null;
-                console.log(profileRes.body[0]);
-                if (profileRes == undefined)
-                return res.json({});
-                else if (profileRes.body[0].a_username != a_username)
-                return res.json({});
+            // [start] 리뷰 정보 가져오기
+            getReviewOptions = {
+            host: "stop_bang_review_DB",
+            port: process.env.PORT,
+            path: `/db/review/findAllByRegno/${req.params.ra_regno}`,
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            };
+            requestBody = { username: a_username };
+            httpRequest(getReviewOptions).then(async (rvRes) => {
+            console.log("리뷰 데이터를 가져옴");
+            if (rvRes.body && rvRes.body.length) {
+                response.agentReviewData = rvRes.body;
 
-                // [start] 리뷰 정보 가져오기
-                getReviewOptions = {
-                host: "stop_bang_review_DB",
-                port: process.env.PORT,
-                path: `/db/review/findAllByRegno/${req.params.ra_regno}`,
-                method: "GET",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                };
-                requestBody = { username: a_username };
-                httpRequest(getReviewOptions).then(async (rvRes) => {
-                console.log("리뷰 데이터를 가져옴");
-                if (rvRes.body && rvRes.body.length) {
-                    response.agentReviewData = rvRes.body;
+                // 각 리뷰에 대한 신고 횟수 가져오기
+                for (let review of response.agentReviewData) {
+                const rv_id = review.id;
 
-                    // 각 리뷰에 대한 신고 횟수 가져오기
-                    for (let review of response.agentReviewData) {
-                    const rv_id = review.id;
-
-                    try {
-                        const reportCheckRes = await httpRequest({
-                        host: "stop_bang_review",
-                        port: process.env.PORT,
-                        path: `/review/reportCheck/${rv_id}`,
-                        method: "GET",
-                        headers: {
-                            "Content-Type": "application/json",
-                        },
-                        });
-
-                        console.log("reportCheckRes:", reportCheckRes);
-                        console.log("신고 횟수를 확인함");
-
-                        review.check_repo = reportCheckRes.body.result;
-                        console.log("신고 횟수 확인: ", reportCheckRes.body.result);
-
-                        if (reportCheckRes.body.result == 1) {
-                        console.log("🚨신고가 7회 누적되어 더이상 접근할 수 없는 후기입니다.🚨");
-                        } else if (reportCheckRes.body.result == 0) {
-                        console.log("신고 7회 이하 후기");
-                        }
-                    } catch (error) {
-                        console.error("Error while fetching report check:", error);
-                    }
-                    }
-                }
-                // [end] 리뷰 정보 가져오기
-
-                response.statistics = makeStatistics(response.agentReviewData);
-                // [start] 평균 평점 정보 가져오기
-                getRatingOptions = {
+                try {
+                    const reportCheckRes = await httpRequest({
                     host: "stop_bang_review",
                     port: process.env.PORT,
-                    path: `/review/avgRate/${req.params.ra_regno}`,
+                    path: `/review/reportCheck/${rv_id}`,
                     method: "GET",
                     headers: {
-                    "Content-Type": "application/json",
+                        "Content-Type": "application/json",
                     },
-                };
-                httpRequest(getRatingOptions).then((rtRes) => {
-                    if(rtRes.body) { 
-                    response.rating = rtRes.body['avg'];
-                    }
-                    else{
-                    response.rating = 0;
-                    }
-                    console.log("평균평점" ,response.rating);
-                // [end] 평균 평점 정보 가져오기
-                }); 
-                    // [end] 평균 평점 정보 가져오기
-                response.tagsData = tags.tags
-                console.log("태그" ,response.tagsData = tags.tags); 
+                    });
 
-                return res.json(response);
-                });
+                    console.log("reportCheckRes:", reportCheckRes);
+                    console.log("신고 횟수를 확인함");
+
+                    review.check_repo = reportCheckRes.body.result;
+                    console.log("신고 횟수 확인: ", reportCheckRes.body.result);
+
+                    if (reportCheckRes.body.result == 1) {
+                    console.log("🚨신고가 7회 누적되어 더이상 접근할 수 없는 후기입니다.🚨");
+                    } else if (reportCheckRes.body.result == 0) {
+                    console.log("신고 7회 이하 후기");
+                    }
+                } catch (error) {
+                    console.error("Error while fetching report check:", error);
+                }
+                }
+            }
+            // [end] 리뷰 정보 가져오기
+
+            response.statistics = makeStatistics(response.agentReviewData);
+            // [start] 평균 평점 정보 가져오기
+            getRatingOptions = {
+                host: "stop_bang_review",
+                port: process.env.PORT,
+                path: `/review/avgRate/${req.params.ra_regno}`,
+                method: "GET",
+                headers: {
+                "Content-Type": "application/json",
+                },
+            };
+            httpRequest(getRatingOptions).then((rtRes) => {
+                if(rtRes.body) { 
+                response.rating = rtRes.body['avg'];
+                }
+                else{
+                response.rating = 0;
+                }
+                console.log("평균평점" ,response.rating);
+            // [end] 평균 평점 정보 가져오기
+            }); 
+                // [end] 평균 평점 정보 가져오기
+            response.tagsData = tags.tags
+            console.log("태그" ,response.tagsData = tags.tags); 
+
+            return res.json(response);
             });
-        } catch (err) {
-            console.error(err.stack);
-        }
-    },
+        });
+    } catch (err) {
+        console.error(err.stack);
+    }
+},
     updateMainInfo: async (req, res) => {
         response = {};
         /* msa */
@@ -249,22 +264,26 @@ module.exports = {
     },
 
     updateEnteredInfo: async (req, res) => {
-        let getEnteredAgent = await agentModel.getEnteredAgent(req.params.id);
-
-        let profileImage = getEnteredAgent[0][0].a_profile_image;
-        console.log(getEnteredAgent[0]);
-        let officeHour = getEnteredAgent[0][0].a_office_hours;
-        let hours = officeHour != null ? officeHour.split(' ') : null;
-
-        let title = `부동산 정보 수정하기`;
-        res.render("agent/updateAgentInfo.ejs", {
-        title: title,
-        agentId: req.params.id,
-        profileImage: profileImage,
-        officeHourS: hours != null ? hours[0] : null,
-        officeHourE: hours != null ? hours[2] : null
-        });
-    },
+        response = {};
+        /* msa */
+        const getUpdateEnteredInfoOptions = {
+          host: 'stop_bang_auth_DB',
+          port: process.env.PORT,
+          path: `/db/agent/findByRaRegno/${req.params.ra_regno}`,
+          method: 'GET',
+          headers: {
+              "Content-Type": "application/json",
+          },
+        }
+        httpRequest(getUpdateEnteredInfoOptions)
+        .then(updateEnteredInfoResult => {
+          response.profileImage = updateEnteredInfoResult.body[0].a_profile_image;
+          let officeHour = updateEnteredInfoResult.body[0].a_office_hours;
+          response.hours = officeHour != null ? officeHour.split(' ') : null;
+          
+          return res.json(response);
+        })
+      },    
 
     updatingEnteredInfo: (req, res, next) => {
         try {
@@ -296,5 +315,5 @@ module.exports = {
         } catch(err) {
         console.log('updating info err : ', err);
         }
-    }
+  }
 }
