@@ -9,21 +9,19 @@ router.use((req, res, next) => {
     next();
   });
 
-router.get("/:ra_regno", agentController.agentProfile);
+router.get("/:sys_regno", agentController.agentProfile);
 
-router.get("/:ra_regno/info_edit", agentController.updateMainInfo);
+router.get("/:sys_regno/info_edit", agentController.updateMainInfo);
 
 router.post(
-    "/:ra_regno/edit_process",
-    agentController.upload.fields([{name: 'myImage1'}, {name: 'myImage2'}, {name: 'myImage3'}]),
+    "/:sys_regno/edit_process",
     agentController.updatingMainInfo,
 );
 
-router.get("/:ra_regno/entered_info_process", agentController.updateEnteredInfo);
+router.get("/:sys_regno/entered_info_process", agentController.updateEnteredInfo);
 
 router.post(
-    "/:ra_regno/entered_info_update",
-    agentController.upload.single("myImage"),
+    "/:sys_regno/entered_info_update",
     agentController.updatingEnteredInfo,
 );
 
