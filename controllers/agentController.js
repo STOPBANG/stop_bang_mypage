@@ -117,8 +117,8 @@ module.exports = {
                 }
 
               // 초기화
-            response.agentRating = 0; // default (통신 추가해야함)
-            response.tagsData = null; // default (통신 추가해야함)
+            response.agentRating = 0; 
+            response.tagsData = null;
             response.agentReviewData = [];
             response.report = null;
             response.statistics = null;
@@ -149,6 +149,21 @@ module.exports = {
                 const rv_id = review.id;
 
                 try {
+                     // 리뷰를 작성한 사용자의 username 가져오기
+                     const postUsernameOPtions = {
+                        host: "stop_bang_auth_DB",
+                        port: process.env.PORT,
+                        path: `/db/resident/findByPk`,
+                        method: "POST",
+                        headers: {
+                        "Content-Type": "application/json",
+                        },
+                    };
+                    const requestBody = {resident_r_id: review.resident_r_id};
+                    const review_username = await httpRequest(postUsernameOPtions, requestBody)
+                    console.log(review_username)
+                    review.username=review_username.body[0].r_username;
+                    console.log(review.username)
                     const reportCheckRes = await httpRequest({
                     host: "stop_bang_review",
                     port: process.env.PORT,
@@ -198,7 +213,24 @@ module.exports = {
                 console.log("평균평점" ,response.rating);
             // [end] 평균 평점 정보 가져오기
             }); 
-                // [end] 평균 평점 정보 가져오기
+            // [start] 신고 정보 가져오기
+            for (let review of response.agentReviewData) {
+                getReportOptions = {
+                    host: "stop_bang_sub_DB",
+                    port: process.env.PORT,
+                    path: `/db/report/findOne/${review.rv_id}/${a_username}`,
+                    method: "GET",
+                    headers: {
+                    "Content-Type": "application/json",
+                    },
+                };
+                httpRequest(getReportOptions).then((reportRes) => {
+                    if (reportRes.body.length)
+                    response.report += reportRes.body[0];
+                });
+                }
+                
+            // [end] 신고 정보 가져오기
             response.tagsData = tags.tags
             console.log("태그" ,response.tagsData = tags.tags); 
 
