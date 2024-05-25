@@ -84,7 +84,7 @@ module.exports = {
       if (r_point < 2) response.canOpen = 0;
       else response.canOpen = 1;
 
-      response.direction = `/review/${req.params.ra_regno}/create`;
+      response.direction = `/review/${req.params.sys_regno}/create`;
       response.report = null;
       response.bookmark = 0;
       response.openedReviewData = null;
@@ -92,7 +92,7 @@ module.exports = {
 
       // [start] 공인중개사 공공데이터 가져오기 -> open api로 수정
       const apiResponse = await fetch(
-        `http://openapi.seoul.go.kr:8088/${process.env.API_KEY}/json/landBizInfo/1/1/${req.params.ra_regno}`
+        `http://openapi.seoul.go.kr:8088/${process.env.API_KEY}/json/landBizInfo/1/1/${req.params.sys_regno}`
       );
       const js = await apiResponse.json();
 
@@ -104,7 +104,7 @@ module.exports = {
       getOptions = {
         host: "stop_bang_auth_DB",
         port: process.env.PORT,
-        path: `/db/agent/findByRaRegno/${req.params.ra_regno}`,
+        path: `/db/agent/findByRaRegno/${req.params.sys_regno}`,
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -123,7 +123,7 @@ module.exports = {
         getReviewOptions = {
           host: "stop_bang_review_DB",
           port: process.env.PORT,
-          path: `/db/review/findAllByRegno/${req.params.ra_regno}`,
+          path: `/db/review/findAllByRegno/${req.params.sys_regno}`,
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -189,7 +189,7 @@ module.exports = {
           getRatingOptions = {
             host: "stop_bang_review",
             port: process.env.PORT,
-            path: `/review/avgRate/${req.params.ra_regno}`,
+            path: `/review/avgRate/${req.params.sys_regno}`,
             method: "GET",
             headers: {
               "Content-Type": "application/json",
@@ -213,7 +213,7 @@ module.exports = {
             getBookOptions = {
               host: "stop_bang_sub_DB",
               port: process.env.PORT,
-              path: `/db/bookmark/findAllByIdnRegno/${r_id}/${req.params.ra_regno}`,
+              path: `/db/bookmark/findAllByIdnRegno/${r_id}/${req.params.sys_regno}`,
               method: "GET",
               headers: {
                 "Content-Type": "application/json",
