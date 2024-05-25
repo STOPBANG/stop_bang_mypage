@@ -74,7 +74,7 @@ module.exports = {
     }),
 
     agentProfile: async (req, res, next) => {
-        const ra_regno = req.params.ra_regno;
+        const sys_regno = req.params.sys_regno;
         const response = {};
         try {
             // const decoded = jwt.verify(
@@ -85,7 +85,7 @@ module.exports = {
             const getProfileOptions = {
             host: 'stop_bang_auth_DB',
             port: process.env.PORT,
-            path: `/db/agent/findByRaRegno/${ra_regno}`,
+            path: `/db/agent/findByRaRegno/${sys_regno}`,
             method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
@@ -96,7 +96,7 @@ module.exports = {
                 // 공인중개사 계정으로 로그인되지 않은 경우 처리 + 다른 공인중개사 페이지 접근 제한
                 let a_username = req.headers.auth;
                 const apiResponse = await fetch(
-                `http://openapi.seoul.go.kr:8088/${process.env.API_KEY}/json/landBizInfo/1/1/${ra_regno}/`
+                `http://openapi.seoul.go.kr:8088/${process.env.API_KEY}/json/landBizInfo/1/1/${sys_regno}/`
                 );
                 const js = await apiResponse.json();
                 if (js.landBizInfo == undefined) {
@@ -132,7 +132,7 @@ module.exports = {
             getReviewOptions = {
             host: "stop_bang_review_DB",
             port: process.env.PORT,
-            path: `/db/review/findAllByRegno/${req.params.ra_regno}`,
+            path: `/db/review/findAllByRegno/${req.params.sys_regno}`,
             method: "GET",
             headers: {
                 "Content-Type": "application/json",
@@ -182,7 +182,7 @@ module.exports = {
             getRatingOptions = {
                 host: "stop_bang_review",
                 port: process.env.PORT,
-                path: `/review/avgRate/${req.params.ra_regno}`,
+                path: `/review/avgRate/${req.params.sys_regno}`,
                 method: "GET",
                 headers: {
                 "Content-Type": "application/json",
@@ -215,7 +215,7 @@ module.exports = {
         const getUpdateMainInfoOptions = {
             host: 'stop_bang_auth_DB',
             port: process.env.PORT,
-            path: `/db/agent/findByRaRegno/${req.params.ra_regno}`,
+            path: `/db/agent/findByRaRegno/${req.params.sys_regno}`,
             method: 'GET',
             headers: {
                 "Content-Type": "application/json",
@@ -269,7 +269,7 @@ module.exports = {
         const getUpdateEnteredInfoOptions = {
           host: 'stop_bang_auth_DB',
           port: process.env.PORT,
-          path: `/db/agent/findByRaRegno/${req.params.ra_regno}`,
+          path: `/db/agent/findByRaRegno/${req.params.sys_regno}`,
           method: 'GET',
           headers: {
               "Content-Type": "application/json",
