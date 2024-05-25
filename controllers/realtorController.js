@@ -89,7 +89,9 @@ module.exports = {
       response.bookmark = 0;
       response.openedReviewData = null;
       response.review = []
-
+      // 아래 줄 추가
+      const ra_regno = req.params.ra_regno;
+      
       // [start] 공인중개사 공공데이터 가져오기 -> open api로 수정
       const apiResponse = await fetch(
         `http://openapi.seoul.go.kr:8088/${process.env.API_KEY}/json/landBizInfo/1/1/${req.params.sys_regno}`
@@ -138,6 +140,8 @@ module.exports = {
             // 각 리뷰에 대한 신고 횟수 가져오기
             for (let review of response.review) {
               const rv_id = review.id;
+              review.rv_id = rv_id;
+              review.ra_regno = ra_regno;
         
               try {
                 // 리뷰를 작성한 사용자의 username 가져오기
@@ -164,7 +168,7 @@ module.exports = {
                   },
                 });
         
-                console.log("reportCheckRes:", reportCheckRes);
+                console.log("reportCheckRes:", reportCheckRes.body);
                 console.log("신고 횟수를 확인함");
         
                 review.check_repo = reportCheckRes.body.result;
@@ -256,7 +260,9 @@ module.exports = {
               };
               httpRequest(getOpenedReviewOptions).then((openedReviewRes) => {
                 if (openedReviewRes.body.length)
-                  response.openedReviewData = openedReviewRes.body[0];
+                  // response.openedReviewData = openedReviewRes.body[0];
+                  // response.openedReviewData = openedReviewRes.body.length ? openedReviewRes.body[0] : [];
+                  response.openedReviewData = openedReviewRes.body.length ? openedReviewRes.body : [];
                 // else response.openedReviewData = null;
                 // [end] 후기 열람 여부 가져오기
 
@@ -272,4 +278,53 @@ module.exports = {
       return res.json({});
     }
   },
+
+  // 열람한 후기에 추가하기
+  // router.post(
+  //   "/openReview/:rv_id",
+  //   realtorController.opening,
+  // );
+  opening: async (req, res) => {
+    console.log("MS_realtorController - 'opening' started");
+
+    try {
+      const decoded = jwt.verify(
+        req.cookies.authToken,
+        process.env.JWT_SECRET_KEY
+      );
+      // let r_username = decoded.userId;
+      let r_id = decoded.id;
+      let r_point = null; // 유저의 포인트를 가져와야 할듯...
+      const response = {};
+      // console.log(req.body);
+      const rv_id = req.params.rv_id;
+
+      postOpenOptions = {
+        host: "stop_bang_sub_DB",
+        port: process.env.PORT,
+        path: `/db/openedReview/create`,
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      };
+      let requestBody = { 
+        r_id: r_id,
+        rv_id: rv_id,
+      };
+      console.log("Request body: ", requestBody);
+
+      openResult = await httpRequest(postOpenOptions, requestBody);
+      console.log("waiting for openResult...");
+      console.log("openResult: ", openResult);
+      if (openResult.body.length){
+        response = openResult.body[0];
+        console.log("opdenResult.body: ", openResult.body[0]);
+      }
+      return res.json(response);
+    } catch (error) {
+      console.log();
+    }
+
+  }
 };

@@ -17,4 +17,11 @@ router.get(
   realtorController.mainPage,
 );
 
+// 열람한 후기에 추가하기
+router.get(
+  "/openReview/:rv_id",
+  realtorController.opening,
+);
+
+
 module.exports = router;
