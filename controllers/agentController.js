@@ -292,7 +292,6 @@ module.exports = {
     },
 
     updateEnteredInfo: async (req, res) => {
-        response = {};
         /* msa */
         const getUpdateEnteredInfoOptions = {
           host: 'stop_bang_auth_DB',
@@ -314,7 +313,6 @@ module.exports = {
       },    
 
     updatingEnteredInfo: (req, res, next) => {
-        response = {};
         let body = req.body;
         /* msa */
         const putUpdatingEnteredInfoOptions = {
