@@ -13,8 +13,15 @@ router.use((req, res, next) => {
 
 //입주민이 보는 공인중개사 홈페이지
 router.get(
-  "/:ra_regno",
+  "/:sys_regno",
   realtorController.mainPage,
 );
+
+// 열람한 후기에 추가하기
+router.get(
+  "/openReview/:rv_id",
+  realtorController.opening,
+);
+
 
 module.exports = router;

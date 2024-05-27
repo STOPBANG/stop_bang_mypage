@@ -111,6 +111,7 @@ module.exports = {
                     }
 
                     /* gcs */
+<<<<<<< HEAD
                     const profileImage = profileRes.body[0].a_profile_image;
                     if (profileImage !== null) {
                     response.a_profile_image = bucket.file(`agent/${profileImage}`).publicUrl();
@@ -142,6 +143,52 @@ module.exports = {
                     httpRequest(getReviewOptions).then(async (rvRes) => {
                         console.log("리뷰 데이터를 가져옴");
 
+=======
+                    const profileImage = profileRes.body[0].a_profile_image; // 프로필 이미지
+                    // console.log(profileImage);
+                    if (profileImage !== null) {
+                        response.agent.a_profile_image = bucket.file(`agent/${profileImage}`).publicUrl();
+                    }
+
+                    if(profileRes.body[0].a_image1 != undefined){
+                        response.agentMainInfo.a_image1 = bucket.file(`agent/${profileRes.body[0].a_image1}`).publicUrl();
+                    }
+
+                    if(profileRes.body[0].a_image2 != undefined){
+                        response.agentMainInfo.a_image2 = bucket.file(`agent/${profileRes.body[0].a_image2}`).publicUrl();
+                    }
+
+                    if(profileRes.body[0].a_image3 != undefined){
+                        response.agentMainInfo.a_image3 = bucket.file(`agent/${profileRes.body[0].a_image3}`).publicUrl();
+                    }
+
+                    // 초기화
+                    response.agentRating = 0; 
+                    response.tagsData = null;
+                    response.agentReviewData = [];
+                    response.report = [];
+                    response.statistics = null;
+                    // console.log(profileRes.body[0]);
+                    if (profileRes == undefined)
+                        return res.json({});
+                    else if (profileRes.body[0].a_username != a_username)
+                        return res.json({});
+
+                    // [start] 리뷰 정보 가져오기
+                    getReviewOptions = {
+                        host: "stop_bang_review_DB",
+                        port: process.env.PORT,
+                        path: `/db/review/findAllByRegno/${req.params.sys_regno}`,
+                        method: "GET",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                    };
+                    requestBody = { username: a_username };
+                    httpRequest(getReviewOptions).then(async (rvRes) => {
+                        console.log("리뷰 데이터를 가져옴");
+
+>>>>>>> f65786036c21d3e40a3901bd2782fd28c898d3f7
                         if (rvRes.body.length) {
                             response.agentReviewData = rvRes.body;
                             response.statistics = makeStatistics(response.agentReviewData);
