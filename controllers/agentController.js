@@ -120,7 +120,7 @@ module.exports = {
                     response.agentRating = 0; 
                     response.tagsData = null;
                     response.agentReviewData = [];
-                    response.report = null;
+                    response.report = [];
                     response.statistics = null;
                     // console.log(profileRes.body[0]);
                     if (profileRes == undefined)
@@ -141,112 +141,114 @@ module.exports = {
                     requestBody = { username: a_username };
                     httpRequest(getReviewOptions).then(async (rvRes) => {
                         console.log("리뷰 데이터를 가져옴");
-                        if (rvRes.body && rvRes.body.length) {
+
+                        if (rvRes.body.length) {
                             response.agentReviewData = rvRes.body;
+                            response.statistics = makeStatistics(response.agentReviewData);
+                            // [start] 평균 평점 정보 가져오기
+                            getRatingOptions = {
+                                host: "stop_bang_review",
+                                port: process.env.PORT,
+                                path: `/review/avgRate/${req.params.sys_regno}`,
+                                method: "GET",
+                                headers: {
+                                "Content-Type": "application/json",
+                                },
+                            };
+                            httpRequest(getRatingOptions).then((rtRes) => {
+                                if(rtRes.body) { 
+                                    response.agentRating = rtRes.body['avg'];
+                                } else response.agentRating = 0;
 
-                            // 각 리뷰에 대한 신고 횟수 가져오기
-                            for (let review of response.agentReviewData) {
-                                const rv_id = review.id;
+                                console.log("평균평점" ,response.agentRating);
+                                // [end] 평균 평점 정보 가져오기
 
-                                try {
-                                    // 리뷰를 작성한 사용자의 username 가져오기
-                                    const postUsernameOPtions = {
-                                        host: "stop_bang_auth_DB",
-                                        port: process.env.PORT,
-                                        path: `/db/resident/findByPk`,
-                                        method: "POST",
-                                        headers: {
-                                        "Content-Type": "application/json",
-                                        },
-                                    };
-                                    const requestBody = {resident_r_id: review.resident_r_id};
-                                    const review_username = await httpRequest(postUsernameOPtions, requestBody)
-                                    // console.log(review_username);
-                                    review.username=review_username.body[0].r_username;
-                                    // console.log(review.username);
-                                    const reportCheckRes = await httpRequest({
-                                        host: "stop_bang_review",
-                                        port: process.env.PORT,
-                                        path: `/review/reportCheck/${rv_id}`,
-                                        method: "GET",
-                                        headers: {
+                                response.tagsData = tags.tags
+                                console.log("태그" ,response.tagsData = tags.tags); 
+                                
+                                // 각 리뷰에 대한 신고 횟수 가져오기
+                                for (let review of response.agentReviewData) {
+                                    const rv_id = review.id;
+
+                                    try {
+                                         // 리뷰를 작성한 사용자의 username 가져오기
+                                        const postUsernameOPtions = {
+                                            host: "stop_bang_auth_DB",
+                                            port: process.env.PORT,
+                                            path: `/db/resident/findByPk`,
+                                            method: "POST",
+                                            headers: {
                                             "Content-Type": "application/json",
-                                        },
-                                    });
+                                            },
+                                        };
+                                        const requestBody = {resident_r_id: review.resident_r_id};
+                                        httpRequest(postUsernameOPtions, requestBody).then(async (review_username) => {
+                                            console.log(review_username);
+                                            review.username=review_username.body[0].r_username;
+                                            console.log(review.username);
 
-                                    console.log("reportCheckRes:", reportCheckRes);
-                                    console.log("신고 횟수를 확인함");
+                                            // [start] 신고 7회 이상인지 확인
+                                            const reportCheckRes = await httpRequest({
+                                                host: "stop_bang_review",
+                                                port: process.env.PORT,
+                                                path: `/review/reportCheck/${rv_id}`,
+                                                method: "GET",
+                                                headers: {
+                                                    "Content-Type": "application/json",
+                                                }
+                                            });
+                                            console.log("신고 횟수를 확인함: ", rv_id);
 
-                                    review.check_repo = reportCheckRes.body.result;
-                                    console.log("신고 횟수 확인: ", reportCheckRes.body.result);
+                                            review.check_repo = reportCheckRes.body.result;
+                                            console.log("신고 횟수 확인: ", reportCheckRes.body.result);
 
-                                    if (reportCheckRes.body.result == 1) {
-                                        console.log("🚨신고가 7회 누적되어 더이상 접근할 수 없는 후기입니다.🚨");
-                                    } else if (reportCheckRes.body.result == 0) {
-                                        console.log("신고 7회 이하 후기");
+                                            if (reportCheckRes.body.result == 1) {
+                                                console.log("🚨신고가 7회 누적되어 더이상 접근할 수 없는 후기입니다.🚨");
+                                            } else if (reportCheckRes.body.result == 0) {
+                                                console.log("신고 7회 이하 후기");
+                                            }
+                                            // [end] 신고 7회 이상인지 확인
+                                            
+
+                                            // [start] 신고 정보 가져오기
+                                            console.log("공인중개사의 신고 정보를 가져옴!");
+                                            console.log("신고 정보 가져오기 - reviewId: ", review.id);
+                                            console.log("신고 정보 가져오기 - a_username: ", a_username);
+
+                                            getReportOptions = {
+                                                host: "stop_bang_sub_DB",
+                                                port: process.env.PORT,
+                                                path: `/db/report/findOne/${review.id}/${a_username}`,
+                                                method: "GET",
+                                                headers: {
+                                                "Content-Type": "application/json",
+                                                },
+                                            };
+                                            
+                                            const reportRes = await httpRequest(getReportOptions);
+                                            console.log("신고 정보 가져옴, rv_id = ", rv_id)
+                                            
+                                            if (reportRes.body) {
+                                                console.log("reportRes!!!!!: ", reportRes.body);
+                                                response.report.push(reportRes.body); 
+                                                console.log("report_rv_id: ", reportRes.body.repo_rv_id);
+                                            }
+                                            // [end] 신고 정보 가져오기
+                                            return res.json(response);
+                                        });
+                                    } catch (error) {
+                                        console.error("Error while fetching report check:", error);
                                     }
-                                } catch (error) {
-                                    console.error("Error while fetching report check:", error);
-                                }
-                            }
+                                } // for문
+                            }); // getRatingOptions 요청
                         }
-                        // [end] 리뷰 정보 가져오기
-
-                        response.statistics = makeStatistics(response.agentReviewData);
-                        // [start] 평균 평점 정보 가져오기
-                        getRatingOptions = {
-                            host: "stop_bang_review",
-                            port: process.env.PORT,
-                            path: `/review/avgRate/${req.params.sys_regno}`,
-                            method: "GET",
-                            headers: {
-                            "Content-Type": "application/json",
-                            },
-                        };
-                        httpRequest(getRatingOptions).then((rtRes) => {
-                            if(rtRes.body) { 
-                            response.rating = rtRes.body['avg'];
-                            }
-                            else{
-                            response.rating = 0;
-                            }
-                            // console.log("평균평점" ,response.rating);
-                        // [end] 평균 평점 정보 가져오기
-
-                            // [start] 신고 정보 가져오기
-                            console.log("공인중개사의 신고 정보를 가져옴!");
-                            for (let review of response.agentReviewData) {
-                                console.log("신고 정보 가져오기 - reviewId: ", review.id);
-                                console.log("신고 정보 가져오기 - a_username: ", a_username);
-                                getReportOptions = {
-                                    host: "stop_bang_sub_DB",
-                                    port: process.env.PORT,
-                                    path: `/db/report/findOne/${review.id}/${a_username}`,
-                                    method: "GET",
-                                    headers: {
-                                    "Content-Type": "application/json",
-                                    },
-                                };
-                                httpRequest(getReportOptions).then((reportRes) => {
-                                    if (reportRes.body) {
-                                        console.log("reportRes!!!!!: ", reportRes.body);
-                                        response.report += reportRes.body;
-                                        console.log("report_rv_id: ", reportRes.body.repo_rv_id);
-                                    }
-                                });
-                            // [end] 신고 정보 가져오기
-                            }
-                        }); 
-                        response.tagsData = tags.tags
-                        // console.log("태그" ,response.tagsData = tags.tags); 
-
-                        return res.json(response);
-                    });
-                });
+                    }); // getReviewOptions 요청
+                    // [end] 리뷰 정보 가져오기
+                }); // getProfileOptions 요청
         } catch (err) {
             console.error(err.stack);
         }
-    },
+    }, // agentProfile 중괄호
 
     updateMainInfo: async (req, res) => {
         response = {};
