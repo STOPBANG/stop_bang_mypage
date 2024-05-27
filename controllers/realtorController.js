@@ -99,7 +99,7 @@ module.exports = {
       response.direction = `/review/${req.params.sys_regno}/create`;
       response.report = [];
       response.bookmark = 0;
-      response.openedReviewData = null;
+      response.openedReviewData = [];
       response.review = []
       // 아래 줄 추가
       const ra_regno = req.params.ra_regno;
