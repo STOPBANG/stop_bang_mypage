@@ -129,26 +129,33 @@ module.exports = {
         if (agentPriRes.body.length){
           response.agentPrivate = agentPriRes.body[0];
                     
-          response.agentPrivate.a_profile_image = null;
-          response.agentPrivate.a_image1 = null;
-          response.agentPrivate.a_image2 = null;
-          response.agentPrivate.a_image3 = null;
-
           /* gcs */
-          if (agentPriRes.body[0].a_profile_image !== undefined) {
+          if (agentPriRes.body[0].a_profile_image != undefined) {
             response.agentPrivate.a_profile_image = bucket.file(`agent/${agentPriRes.body[0].a_profile_image}`).publicUrl();
+          }
+          else{
+            response.agentPrivate.a_profile_image = null;
           }
 
           if(agentPriRes.body[0].a_image1 != undefined){
               response.agentPrivate.a_image1 = bucket.file(`agent/${agentPriRes.body[0].a_image1}`).publicUrl();
           }
+          else{
+            response.agentPrivate.a_image1 = null;
+          }
 
           if(agentPriRes.body[0].a_image2 != undefined){
               response.agentPrivate.a_image2 = bucket.file(`agent/${agentPriRes.body[0].a_image2}`).publicUrl();
           }
+          else{
+            response.agentPrivate.a_image2 = null;
+          }
 
           if(agentPriRes.body[0].a_image3 != undefined){
               response.agentPrivate.a_image3 = bucket.file(`agent/${agentPriRes.body[0].a_image3}`).publicUrl();
+          }
+          else{
+            response.agentPrivate.a_image3 = null;
           }
         }
         else response.agentPrivate = null;
