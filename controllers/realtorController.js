@@ -284,9 +284,12 @@ module.exports = {
                 httpRequest(getReportOptions).then((reportRes) => {
                   if (reportRes.body) {
                     console.log("reportRes!!!!!: ", reportRes.body);
-                    response.report.push(reportRes.body.repo_rv_id); 
+                    response.report.push(reportRes.body); 
                     console.log("report_rv_id: ", reportRes.body.repo_rv_id);
                   }
+                  else {
+                    console.log("신고 정보를 가져올 수 없음");
+                }
                 });
               }
               
