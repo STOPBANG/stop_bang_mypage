@@ -120,6 +120,24 @@ module.exports = {
         else response.agentPrivate = null;
         // [end] 공인중개사 개인정보 가져오기
 
+        /* gcs */
+        const profileImage = agentPriRes.body[0].a_profile_image; // 프로필 이미지
+        if (profileImage !== null) {
+            response.agentPrivate.a_profile_image = bucket.file(`agent/${profileImage}`).publicUrl();
+        }
+
+        if(profileRes.body[0].a_image1 != undefined){
+            response.agentPrivate.a_image1 = bucket.file(`agent/${agentPriRes.body[0].a_image1}`).publicUrl();
+        }
+
+        if(profileRes.body[0].a_image2 != undefined){
+            response.agentPrivate.a_image2 = bucket.file(`agent/${agentPriRes.body[0].a_image2}`).publicUrl();
+        }
+
+        if(profileRes.body[0].a_image3 != undefined){
+            response.agentPrivate.a_image3 = bucket.file(`agent/${agentPriRes.body[0].a_image3}`).publicUrl();
+        }
+
         response.rating = 0;
         // [start] 리뷰 정보 가져오기
         getReviewOptions = {

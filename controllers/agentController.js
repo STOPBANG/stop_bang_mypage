@@ -115,7 +115,7 @@ module.exports = {
                         response.agentMainInfo.a_image3 = bucket.file(`agent/${profileRes.body[0].a_image3}`).publicUrl();
                     }
 
-                    console.log(response.agentMainInfo);
+                    // console.log(response.agentMainInfo);
 
                     // 초기화
                     response.agentRating = 0; 
