@@ -13,7 +13,9 @@ app.use(cookieParser(process.env.COOKIE_SECRET_KEY));
 
 //Routers
 const realtorRouter = require("./routers/realtorRouter"),
-  agentRouter = require("./routers/agentRouter.js");
+  agentRouter = require("./routers/agentRouter.js"),
+  residentRouter = require('./routers/residentRouter.js'),
+  agentMypageRouter = require('./routers/agentMypageRouter.js');
 
 
 //View
@@ -29,6 +31,8 @@ app.use(express.urlencoded({ extended: false }));
 
 app.use("/realtor", realtorRouter);
 app.use("/agent", agentRouter);
+app.use("/resident", residentRouter);
+app.use("/agentMypage", agentMypageRouter);
 
 app.listen(app.get("port"), () => {
   console.log("Realtor_page app listening on port " + app.get("port"));
