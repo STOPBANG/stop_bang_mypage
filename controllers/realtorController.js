@@ -11,7 +11,6 @@ const GCP_KEYFILE_PATH = process.env.GCP_KEYFILE_PATH;
 const GCP_BUCKET_NAME = process.env.GCP_BUCKET_NAME;
 
 const {Storage} = require('@google-cloud/storage');
-const {httpRequest} = require("../utils/httpRequest.js");
 const storage = new Storage({
   projectId: GCP_PROJECT_ID,
   keyFilename: GCP_KEYFILE_PATH
