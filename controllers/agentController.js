@@ -65,23 +65,10 @@ function jsonKeyLowerCase(object){
 }
 
 module.exports = {
-    // upload: multer({
-    //     storage: multer.memoryStorage(),
-    //     limits: { fileSize: 10 * 1024 * 1024 },
-    //     fileFilter: function (req, file, cb) {
-    //         checkFileType(file, cb);
-    //     },
-    // }),
-
     agentProfile: async (req, res, next) => {
         const sys_regno = req.params.sys_regno;
         const response = {};
         try {
-            // const decoded = jwt.verify(
-            //     req.cookies.authToken,
-            //     process.env.JWT_SECRET_KEY
-            //   );
-            // let a_username = decoded.userId;
             const getProfileOptions = {
                 host: 'stop_bang_auth_DB',
                 port: process.env.PORT,
@@ -111,9 +98,22 @@ module.exports = {
                     }
 
                     /* gcs */
-                    const profileImage = profileRes.body[0].a_profile_image;
+                    const profileImage = profileRes.body[0].a_profile_image; // 프로필 이미지
+                    // console.log(profileImage);
                     if (profileImage !== null) {
-                    response.a_profile_image = bucket.file(`agent/${profileImage}`).publicUrl();
+                        response.agent.a_profile_image = bucket.file(`agent/${profileImage}`).publicUrl();
+                    }
+
+                    if(profileRes.body[0].a_image1 != undefined){
+                        response.agentMainInfo.a_image1 = bucket.file(`agent/${profileRes.body[0].a_image1}`).publicUrl();
+                    }
+
+                    if(profileRes.body[0].a_image2 != undefined){
+                        response.agentMainInfo.a_image2 = bucket.file(`agent/${profileRes.body[0].a_image2}`).publicUrl();
+                    }
+
+                    if(profileRes.body[0].a_image3 != undefined){
+                        response.agentMainInfo.a_image3 = bucket.file(`agent/${profileRes.body[0].a_image3}`).publicUrl();
                     }
 
                     // 초기화
@@ -122,11 +122,11 @@ module.exports = {
                     response.agentReviewData = [];
                     response.report = null;
                     response.statistics = null;
-                    console.log(profileRes.body[0]);
+                    // console.log(profileRes.body[0]);
                     if (profileRes == undefined)
-                    return res.json({});
+                        return res.json({});
                     else if (profileRes.body[0].a_username != a_username)
-                    return res.json({});
+                        return res.json({});
 
                     // [start] 리뷰 정보 가져오기
                     getReviewOptions = {
@@ -161,9 +161,9 @@ module.exports = {
                                     };
                                     const requestBody = {resident_r_id: review.resident_r_id};
                                     const review_username = await httpRequest(postUsernameOPtions, requestBody)
-                                    console.log(review_username);
+                                    // console.log(review_username);
                                     review.username=review_username.body[0].r_username;
-                                    console.log(review.username);
+                                    // console.log(review.username);
                                     const reportCheckRes = await httpRequest({
                                         host: "stop_bang_review",
                                         port: process.env.PORT,
@@ -210,7 +210,7 @@ module.exports = {
                             else{
                             response.rating = 0;
                             }
-                            console.log("평균평점" ,response.rating);
+                            // console.log("평균평점" ,response.rating);
                         // [end] 평균 평점 정보 가져오기
 
                             // [start] 신고 정보 가져오기
@@ -238,7 +238,7 @@ module.exports = {
                             }
                         }); 
                         response.tagsData = tags.tags
-                        console.log("태그" ,response.tagsData = tags.tags); 
+                        // console.log("태그" ,response.tagsData = tags.tags); 
 
                         return res.json(response);
                     });
