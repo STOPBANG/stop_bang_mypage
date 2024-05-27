@@ -5,6 +5,19 @@ const tags = require("../public/assets/tag.js");
 const jwt = require("jsonwebtoken");
 const { httpRequest } = require("../utils/httpRequest.js");
 
+// gcp bucket
+const GCP_PROJECT_ID = process.env.GCP_PROJECT_ID;
+const GCP_KEYFILE_PATH = process.env.GCP_KEYFILE_PATH;
+const GCP_BUCKET_NAME = process.env.GCP_BUCKET_NAME;
+
+const {Storage} = require('@google-cloud/storage');
+const {httpRequest} = require("../utils/httpRequest.js");
+const storage = new Storage({
+  projectId: GCP_PROJECT_ID,
+  keyFilename: GCP_KEYFILE_PATH
+});
+const bucket = storage.bucket(GCP_BUCKET_NAME);
+
 const makeStatistics = (reviews) => {
   let array = Array.from({ length: 10 }, () => 0);
   let stArray = new Array(10);
@@ -112,11 +125,14 @@ module.exports = {
           "Content-Type": "application/json",
         },
       };
-      requestBody = { username: r_username };
+      // requestBody = { username: r_username };
 
-      httpRequest(getOptions, requestBody).then((agentPriRes) => {
+      httpRequest(getOptions).then((agentPriRes) => {
+        console.log(agentPriRes.body);
         if (agentPriRes.body.length){
           response.agentPrivate = agentPriRes.body[0];
+          
+          console.log(agentPriRes.body[0]);
           
           /* gcs */
           if (agentPriRes.body[0].a_profile_image !== undefined) {
