@@ -115,28 +115,47 @@ module.exports = {
       requestBody = { username: r_username };
 
       httpRequest(getOptions, requestBody).then((agentPriRes) => {
-        if (agentPriRes.body.length)
+        if (agentPriRes.body.length){
           response.agentPrivate = agentPriRes.body[0];
+          
+          /* gcs */
+          if (agentPriRes.body[0].a_profile_image !== undefined) {
+            response.agentPrivate.a_profile_image = bucket.file(`agent/${agentPriRes.body[0].a_profile_image}`).publicUrl();
+          }
+
+          if(agentPriRes.body[0].a_image1 != undefined){
+              response.agentPrivate.a_image1 = bucket.file(`agent/${agentPriRes.body[0].a_image1}`).publicUrl();
+          }
+
+          if(agentPriRes.body[0].a_image2 != undefined){
+              response.agentPrivate.a_image2 = bucket.file(`agent/${agentPriRes.body[0].a_image2}`).publicUrl();
+          }
+
+          if(agentPriRes.body[0].a_image3 != undefined){
+              response.agentPrivate.a_image3 = bucket.file(`agent/${agentPriRes.body[0].a_image3}`).publicUrl();
+          }
+        }
         else response.agentPrivate = null;
         // [end] 공인중개사 개인정보 가져오기
 
+        console.log(agentPriRes.body[0]);
         /* gcs */
         // const profileImage = agentPriRes.body[0].a_profile_image; // 프로필 이미지
-        if (agentPriRes.body[0].a_profile_image !== undefined) {
-            response.agentPrivate.a_profile_image = bucket.file(`agent/${agentPriRes.body[0].a_profile_image}`).publicUrl();
-        }
+        // if (agentPriRes.body[0].a_profile_image !== undefined) {
+        //     response.agentPrivate.a_profile_image = bucket.file(`agent/${agentPriRes.body[0].a_profile_image}`).publicUrl();
+        // }
 
-        if(agentPriRes.body[0].a_image1 != undefined){
-            response.agentPrivate.a_image1 = bucket.file(`agent/${agentPriRes.body[0].a_image1}`).publicUrl();
-        }
+        // if(agentPriRes.body[0].a_image1 != undefined){
+        //     response.agentPrivate.a_image1 = bucket.file(`agent/${agentPriRes.body[0].a_image1}`).publicUrl();
+        // }
 
-        if(agentPriRes.body[0].a_image2 != undefined){
-            response.agentPrivate.a_image2 = bucket.file(`agent/${agentPriRes.body[0].a_image2}`).publicUrl();
-        }
+        // if(agentPriRes.body[0].a_image2 != undefined){
+        //     response.agentPrivate.a_image2 = bucket.file(`agent/${agentPriRes.body[0].a_image2}`).publicUrl();
+        // }
 
-        if(agentPriRes.body[0].a_image3 != undefined){
-            response.agentPrivate.a_image3 = bucket.file(`agent/${agentPriRes.body[0].a_image3}`).publicUrl();
-        }
+        // if(agentPriRes.body[0].a_image3 != undefined){
+        //     response.agentPrivate.a_image3 = bucket.file(`agent/${agentPriRes.body[0].a_image3}`).publicUrl();
+        // }
 
         response.rating = 0;
         // [start] 리뷰 정보 가져오기
