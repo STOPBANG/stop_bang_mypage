@@ -282,8 +282,11 @@ module.exports = {
                   },
                 };
                 httpRequest(getReportOptions).then((reportRes) => {
-                  if (reportRes.body.length)
-                    response.report += reportRes.body[0];
+                  if (reportRes.body) {
+                    console.log("reportRes!!!!!: ", reportRes.body);
+                    response.report.push(reportRes.body.repo_rv_id); 
+                    console.log("report_rv_id: ", reportRes.body.repo_rv_id);
+                  }
                 });
               }
               
