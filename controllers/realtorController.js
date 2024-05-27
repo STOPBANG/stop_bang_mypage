@@ -127,11 +127,11 @@ module.exports = {
       // requestBody = { username: r_username };
 
       httpRequest(getOptions).then((agentPriRes) => {
-        console.log(agentPriRes.body);
+        // console.log(agentPriRes.body);
         if (agentPriRes.body.length){
           response.agentPrivate = agentPriRes.body[0];
           
-          console.log(agentPriRes.body[0]);
+          // console.log(agentPriRes.body[0]);
           
           /* gcs */
           if (agentPriRes.body[0].a_profile_image !== undefined) {
