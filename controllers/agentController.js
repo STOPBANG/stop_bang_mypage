@@ -237,9 +237,11 @@ module.exports = {
                                                 response.report.push(reportRes.body); 
                                                 console.log("report_rv_id: ", reportRes.body.repo_rv_id);
                                             }
-                                            // [end] 신고 정보 가져오기
-                                            return res.json(response);
+                                            // // [end] 신고 정보 가져오기
+                                            // return res.json(response);
                                         });
+                                    // [end] 신고 정보 가져오기
+                                    return res.json(response);
                                     } catch (error) {
                                         console.error("Error while fetching report check:", error);
                                     }
