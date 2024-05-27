@@ -65,13 +65,13 @@ function jsonKeyLowerCase(object){
 }
 
 module.exports = {
-    upload: multer({
-        storage: multer.memoryStorage(),
-        limits: { fileSize: 10 * 1024 * 1024 },
-        fileFilter: function (req, file, cb) {
-            checkFileType(file, cb);
-        },
-    }),
+    // upload: multer({
+    //     storage: multer.memoryStorage(),
+    //     limits: { fileSize: 10 * 1024 * 1024 },
+    //     fileFilter: function (req, file, cb) {
+    //         checkFileType(file, cb);
+    //     },
+    // }),
 
     agentProfile: async (req, res, next) => {
         const sys_regno = req.params.sys_regno;
@@ -284,22 +284,11 @@ module.exports = {
                 "Content-Type": "application/json",
             },
         };
-        let requestBody = { files: req.files, introduction: req.body.introduction, sys_regno: req.body.sys_regno};
+        let requestBody = { file: req.body.file, introduction: req.body.introduction, sys_regno: req.body.sys_regno};
         httpRequest(putUpdatingMainInfoOptions, requestBody)
         .then(updatingMainInfoResult => { 
             return res.json(updatingMainInfoResult);
         })
-        //
-        // agentModel.updateMainInfo(req.params.id, req.files, req.body, () => {
-        // if (res === null) {
-        //     if (error === "imageError") {
-        //     res.render('notFound.ejs', {message: "이미지 크기가 너무 큽니다. 다른 사이즈로 시도해주세요."})
-        //     }
-        // } else {
-        //     res.locals.redirect = `/agent/${req.params.id}`;
-        //     next();
-        // }
-        // });
     },
 
     updateEnteredInfo: async (req, res) => {
@@ -325,34 +314,21 @@ module.exports = {
       },    
 
     updatingEnteredInfo: (req, res, next) => {
-        try {
-        let filename = '';
-        /* gcs */
-        if(req.file) {
-            const date = new Date();
-            const fileTime = date.getTime();
-            filename = `${fileTime}-${req.file.originalname}`;
-            const gcsFileDir = `agent/${filename}`;
-            // gcs에 agent 폴더 밑에 파일이 저장
-            const blob = bucket.file(gcsFileDir);
-            const blobStream = blob.createWriteStream();
-
-            blobStream.on('finish', () => {
-            console.log('gcs upload successed');
-            });
-
-            blobStream.on('error', (err) => {
-            console.log(err);
-            });
-
-            blobStream.end(req.file.buffer);
-        }
-        req.file.filename = filename;
-        agentModel.updateEnterdAgentInfo(req.params.id, req.file, req.body, () => {
-            res.redirect(`/agent/${req.params.id}`);
-        });
-        } catch(err) {
-        console.log('updating info err : ', err);
-        }
+        response = {};
+        /* msa */
+        const putUpdatingMainInfoOptions = {
+            host: 'stop_bang_auth_DB',
+            port: process.env.PORT,
+            path: `/db/agent/updateEnteredInfo`,
+            method: 'PUT',
+            headers: {
+                "Content-Type": "application/json",
+            },
+        };
+        let requestBody = { file: req.body.file, introduction: req.body.introduction, sys_regno: req.body.sys_regno};
+        httpRequest(putUpdatingMainInfoOptions, requestBody)
+        .then(updatingMainInfoResult => { 
+            return res.json(updatingMainInfoResult);
+        })
   }
 }
