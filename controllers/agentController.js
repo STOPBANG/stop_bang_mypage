@@ -97,14 +97,11 @@ module.exports = {
                         response.agentSubInfo = profileRes.body[0];
                     }
 
-                    // console.log(profileRes.body[0]);
                     /* gcs */
                     const profileImage = profileRes.body[0].a_profile_image; // 프로필 이미지
-                    // console.log(response.agent);
                     if (profileImage !== null) {
                         response.agent.a_profile_image = bucket.file(`agent/${profileImage}`).publicUrl();
                     }
-                    console.log(response.agent);
 
                     if(profileRes.body[0].a_image1 != undefined){
                         response.agentMainInfo.a_image1 = bucket.file(`agent/${profileRes.body[0].a_image1}`).publicUrl();
