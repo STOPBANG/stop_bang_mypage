@@ -315,8 +315,9 @@ module.exports = {
 
     updatingEnteredInfo: (req, res, next) => {
         response = {};
+        let body = req.body;
         /* msa */
-        const putUpdatingMainInfoOptions = {
+        const putUpdatingEnteredInfoOptions = {
             host: 'stop_bang_auth_DB',
             port: process.env.PORT,
             path: `/db/agent/updateEnteredInfo`,
@@ -325,10 +326,10 @@ module.exports = {
                 "Content-Type": "application/json",
             },
         };
-        let requestBody = { file: req.body.file, introduction: req.body.introduction, sys_regno: req.body.sys_regno};
-        httpRequest(putUpdatingMainInfoOptions, requestBody)
-        .then(updatingMainInfoResult => { 
-            return res.json(updatingMainInfoResult);
+        let requestBody = { file: body.file, a_office_hours: body.a_office_hours, sys_regno: body.sys_regno};
+        httpRequest(putUpdatingEnteredInfoOptions, requestBody)
+        .then(updatingEnteredInfoResult => { 
+            return res.json(updatingEnteredInfoResult);
         })
   }
 }
