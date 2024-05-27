@@ -97,7 +97,7 @@ module.exports = {
       else response.canOpen = 1;
 
       response.direction = `/review/${req.params.sys_regno}/create`;
-      response.report = null;
+      response.report = [];
       response.bookmark = 0;
       response.openedReviewData = null;
       response.review = []
