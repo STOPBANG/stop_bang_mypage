@@ -117,7 +117,7 @@ module.exports = {
                     }
 
                     // 초기화
-                    response.agentRating = 0; 
+                    response.rating= 0; 
                     response.tagsData = null;
                     response.agentReviewData = [];
                     response.report = null;
