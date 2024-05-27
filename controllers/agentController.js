@@ -98,9 +98,9 @@ module.exports = {
                     }
 
                     /* gcs */
-                    const profileImage = profileRes.body[0].a_profile_image; // 프로필 이미지
-                    if (profileImage !== null) {
-                        response.agent.a_profile_image = bucket.file(`agent/${profileImage}`).publicUrl();
+                    // const profileImage = profileRes.body[0].a_profile_image; // 프로필 이미지
+                    if (profileRes.body[0].a_profile_image !== null) {
+                        response.agent.a_profile_image = bucket.file(`agent/${profileRes.body[0].a_profile_image}`).publicUrl();
                     }
 
                     if(profileRes.body[0].a_image1 != undefined){
@@ -115,7 +115,7 @@ module.exports = {
                         response.agentMainInfo.a_image3 = bucket.file(`agent/${profileRes.body[0].a_image3}`).publicUrl();
                     }
 
-                    // console.log(response.agentMainInfo);
+                    console.log(response.agentMainInfo);
 
                     // 초기화
                     response.agentRating = 0; 
@@ -234,11 +234,9 @@ module.exports = {
                                                 response.report.push(reportRes.body); 
                                                 console.log("report_rv_id: ", reportRes.body.repo_rv_id);
                                             }
-                                            // // [end] 신고 정보 가져오기
-                                            // return res.json(response);
+                                            // [end] 신고 정보 가져오기
+                                            return res.json(response);
                                         });
-                                    // [end] 신고 정보 가져오기
-                                    return res.json(response);
                                     } catch (error) {
                                         console.error("Error while fetching report check:", error);
                                     }
