@@ -75,6 +75,7 @@ module.exports = {
           r_point = agentResult.body[0].r_point;
         }
       }
+      response.r_id = r_id;
       // [end] 로그인 계정 정보 가져오기
 
       if (response.rating == null) response.tagsData = null;
@@ -83,15 +84,17 @@ module.exports = {
       if (r_point < 2) response.canOpen = 0;
       else response.canOpen = 1;
 
-      response.direction = `/review/${req.params.ra_regno}/create`;
+      response.direction = `/review/${req.params.sys_regno}/create`;
       response.report = null;
       response.bookmark = 0;
       response.openedReviewData = null;
       response.review = []
-
+      // 아래 줄 추가
+      const ra_regno = req.params.ra_regno;
+      
       // [start] 공인중개사 공공데이터 가져오기 -> open api로 수정
       const apiResponse = await fetch(
-        `http://openapi.seoul.go.kr:8088/${process.env.API_KEY}/json/landBizInfo/1/1/${req.params.ra_regno}`
+        `http://openapi.seoul.go.kr:8088/${process.env.API_KEY}/json/landBizInfo/1/1/${req.params.sys_regno}`
       );
       const js = await apiResponse.json();
 
@@ -103,7 +106,7 @@ module.exports = {
       getOptions = {
         host: "stop_bang_auth_DB",
         port: process.env.PORT,
-        path: `/db/agent/findByRaRegno/${req.params.ra_regno}`,
+        path: `/db/agent/findByRaRegno/${req.params.sys_regno}`,
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -117,20 +120,70 @@ module.exports = {
         else response.agentPrivate = null;
         // [end] 공인중개사 개인정보 가져오기
 
-        response.rating = 0; // 수정 중
+        response.rating = 0;
         // [start] 리뷰 정보 가져오기
         getReviewOptions = {
           host: "stop_bang_review_DB",
           port: process.env.PORT,
-          path: `/db/review/findAllByRegno/${req.params.ra_regno}`,
+          path: `/db/review/findAllByRegno/${req.params.sys_regno}`,
           method: "GET",
           headers: {
             "Content-Type": "application/json",
           },
         };
         requestBody = { username: r_username };
-        httpRequest(getReviewOptions).then((rvRes) => {
-          if (rvRes.body.length) response.review = rvRes.body;
+        httpRequest(getReviewOptions).then(async (rvRes) => {
+          console.log("리뷰 데이터를 가져옴");
+          if (rvRes.body.length) {
+            response.review = rvRes.body;
+        
+            // 각 리뷰에 대한 신고 횟수 가져오기
+            for (let review of response.review) {
+              const rv_id = review.id;
+              review.rv_id = rv_id;
+              review.ra_regno = ra_regno;
+        
+              try {
+                // 리뷰를 작성한 사용자의 username 가져오기
+                const postUsernameOPtions = {
+                  host: "stop_bang_auth_DB",
+                  port: process.env.PORT,
+                  path: `/db/resident/findByPk`,
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json",
+                  },
+                };
+                const requestBody = {resident_r_id: review.resident_r_id};
+                const review_username = await httpRequest(postUsernameOPtions, requestBody)
+                review.username=review_username.body[0].r_username;
+                
+                const reportCheckRes = await httpRequest({
+                  host: "stop_bang_review",
+                  port: process.env.PORT,
+                  path: `/review/reportCheck/${rv_id}`,
+                  method: "GET",
+                  headers: {
+                    "Content-Type": "application/json",
+                  },
+                });
+        
+                console.log("reportCheckRes:", reportCheckRes.body);
+                console.log("신고 횟수를 확인함");
+        
+                review.check_repo = reportCheckRes.body.result;
+                console.log("신고 횟수 확인: ", reportCheckRes.body.result);
+        
+                if (reportCheckRes.body.result == 1) {
+                  console.log("🚨신고가 7회 누적되어 더이상 접근할 수 없는 후기입니다.🚨");
+                } else if (reportCheckRes.body.result == 0) {
+                  console.log("신고 7회 이하 후기");
+                }
+              } catch (error) {
+                console.error("Error while fetching report check:", error);
+              }
+            }
+          }
           // [end] 리뷰 정보 가져오기
 
           response.agentReviewData = response.review;
@@ -140,7 +193,7 @@ module.exports = {
           getRatingOptions = {
             host: "stop_bang_review",
             port: process.env.PORT,
-            path: `/review/avgRate/${req.params.ra_regno}`,
+            path: `/review/avgRate/${req.params.sys_regno}`,
             method: "GET",
             headers: {
               "Content-Type": "application/json",
@@ -149,20 +202,22 @@ module.exports = {
           httpRequest(getRatingOptions).then((rtRes) => {
             if(rtRes.body) { 
               response.rating = rtRes.body['avg'];
-              console.log("im here yesbody")
             }
             else{
               response.rating = 0;
             }
           // [end] 평균 평점 정보 가져오기
           });
+
+          if (response.rating == null) response.tagsData = null;
+          else response.tagsData = tags.tags;
           
           if (response.who == 1) {
             // [start] 북마크 정보 가져오기
             getBookOptions = {
               host: "stop_bang_sub_DB",
               port: process.env.PORT,
-              path: `/db/bookmark/findAllByIdnRegno/${r_id}/${req.params.ra_regno}`,
+              path: `/db/bookmark/findAllByIdnRegno/${r_id}/${req.params.sys_regno}`,
               method: "GET",
               headers: {
                 "Content-Type": "application/json",
@@ -190,6 +245,7 @@ module.exports = {
                     response.report += reportRes.body[0];
                 });
               }
+              
               // [end] 신고 정보 가져오기
 
               // [start] 후기 열람 여부 가져오기
@@ -204,7 +260,9 @@ module.exports = {
               };
               httpRequest(getOpenedReviewOptions).then((openedReviewRes) => {
                 if (openedReviewRes.body.length)
-                  response.openedReviewData = openedReviewRes.body[0];
+                  // response.openedReviewData = openedReviewRes.body[0];
+                  // response.openedReviewData = openedReviewRes.body.length ? openedReviewRes.body[0] : [];
+                  response.openedReviewData = openedReviewRes.body.length ? openedReviewRes.body : [];
                 // else response.openedReviewData = null;
                 // [end] 후기 열람 여부 가져오기
 
@@ -220,4 +278,53 @@ module.exports = {
       return res.json({});
     }
   },
+
+  // 열람한 후기에 추가하기
+  // router.post(
+  //   "/openReview/:rv_id",
+  //   realtorController.opening,
+  // );
+  opening: async (req, res) => {
+    console.log("MS_realtorController - 'opening' started");
+
+    try {
+      const decoded = jwt.verify(
+        req.cookies.authToken,
+        process.env.JWT_SECRET_KEY
+      );
+      // let r_username = decoded.userId;
+      let r_id = decoded.id;
+      let r_point = null; // 유저의 포인트를 가져와야 할듯...
+      const response = {};
+      // console.log(req.body);
+      const rv_id = req.params.rv_id;
+
+      postOpenOptions = {
+        host: "stop_bang_sub_DB",
+        port: process.env.PORT,
+        path: `/db/openedReview/create`,
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      };
+      let requestBody = { 
+        r_id: r_id,
+        rv_id: rv_id,
+      };
+      console.log("Request body: ", requestBody);
+
+      openResult = await httpRequest(postOpenOptions, requestBody);
+      console.log("waiting for openResult...");
+      console.log("openResult: ", openResult);
+      if (openResult.body.length){
+        response = openResult.body[0];
+        console.log("opdenResult.body: ", openResult.body[0]);
+      }
+      return res.json(response);
+    } catch (error) {
+      console.log();
+    }
+
+  }
 };
