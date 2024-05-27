@@ -65,23 +65,10 @@ function jsonKeyLowerCase(object){
 }
 
 module.exports = {
-    // upload: multer({
-    //     storage: multer.memoryStorage(),
-    //     limits: { fileSize: 10 * 1024 * 1024 },
-    //     fileFilter: function (req, file, cb) {
-    //         checkFileType(file, cb);
-    //     },
-    // }),
-
     agentProfile: async (req, res, next) => {
         const sys_regno = req.params.sys_regno;
         const response = {};
         try {
-            // const decoded = jwt.verify(
-            //     req.cookies.authToken,
-            //     process.env.JWT_SECRET_KEY
-            //   );
-            // let a_username = decoded.userId;
             const getProfileOptions = {
                 host: 'stop_bang_auth_DB',
                 port: process.env.PORT,
@@ -110,45 +97,14 @@ module.exports = {
                         response.agentSubInfo = profileRes.body[0];
                     }
 
+                    // console.log(profileRes.body[0]);
                     /* gcs */
-<<<<<<< HEAD
-                    const profileImage = profileRes.body[0].a_profile_image;
-                    if (profileImage !== null) {
-                    response.a_profile_image = bucket.file(`agent/${profileImage}`).publicUrl();
-                    }
-
-                    // 초기화
-                    response.agentRating = 0; 
-                    response.tagsData = null;
-                    response.agentReviewData = [];
-                    response.report = [];
-                    response.statistics = null;
-                    console.log(profileRes.body[0]);
-                    if (profileRes == undefined)
-                        return res.json({});
-                    else if (profileRes.body[0].a_username != a_username)
-                        return res.json({});
-
-                    // [start] 리뷰 정보 가져오기
-                    getReviewOptions = {
-                        host: "stop_bang_review_DB",
-                        port: process.env.PORT,
-                        path: `/db/review/findAllByRegno/${req.params.sys_regno}`,
-                        method: "GET",
-                        headers: {
-                            "Content-Type": "application/json",
-                        },
-                    };
-                    requestBody = { username: a_username };
-                    httpRequest(getReviewOptions).then(async (rvRes) => {
-                        console.log("리뷰 데이터를 가져옴");
-
-=======
                     const profileImage = profileRes.body[0].a_profile_image; // 프로필 이미지
-                    // console.log(profileImage);
+                    // console.log(response.agent);
                     if (profileImage !== null) {
                         response.agent.a_profile_image = bucket.file(`agent/${profileImage}`).publicUrl();
                     }
+                    console.log(response.agent);
 
                     if(profileRes.body[0].a_image1 != undefined){
                         response.agentMainInfo.a_image1 = bucket.file(`agent/${profileRes.body[0].a_image1}`).publicUrl();
@@ -161,6 +117,8 @@ module.exports = {
                     if(profileRes.body[0].a_image3 != undefined){
                         response.agentMainInfo.a_image3 = bucket.file(`agent/${profileRes.body[0].a_image3}`).publicUrl();
                     }
+
+                    console.log(response.agentMainInfo);
 
                     // 초기화
                     response.agentRating = 0; 
@@ -188,7 +146,6 @@ module.exports = {
                     httpRequest(getReviewOptions).then(async (rvRes) => {
                         console.log("리뷰 데이터를 가져옴");
 
->>>>>>> f65786036c21d3e40a3901bd2782fd28c898d3f7
                         if (rvRes.body.length) {
                             response.agentReviewData = rvRes.body;
                             response.statistics = makeStatistics(response.agentReviewData);
@@ -289,10 +246,12 @@ module.exports = {
                                 } // for문
                             }); // getRatingOptions 요청
                         }
+                        return res.json(response);
                     }); // getReviewOptions 요청
                     // [end] 리뷰 정보 가져오기
                 }); // getProfileOptions 요청
         } catch (err) {
+            console.log(err);
             console.error(err.stack);
         }
     }, // agentProfile 중괄호
