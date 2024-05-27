@@ -172,7 +172,7 @@ module.exports = {
                                     const rv_id = review.id;
 
                                     try {
-                                         // 리뷰를 작성한 사용자의 username 가져오기
+                                        // 리뷰를 작성한 사용자의 username 가져오기
                                         const postUsernameOPtions = {
                                             host: "stop_bang_auth_DB",
                                             port: process.env.PORT,
@@ -239,11 +239,10 @@ module.exports = {
                                                     console.log("신고 정보를 가져올 수 없음");
                                                 }
                                         
+                                            })
+                                            .then(() => {
                                                 return res.json(response); // 모든 작업이 완료된 후에 응답을 보냄
                                             })
-                                            // .then(() => {
-                                            //     return res.json(response); // 모든 작업이 완료된 후에 응답을 보냄
-                                            // })
                                             .catch((error) => {
                                                 console.error("Error while fetching report check:", error);
                                             });
@@ -254,7 +253,6 @@ module.exports = {
                                 } // for문
                             }); // getRatingOptions 요청
                         }
-                        // return res.json(response);
                     }); // getReviewOptions 요청
                     // [end] 리뷰 정보 가져오기
                 }); // getProfileOptions 요청
