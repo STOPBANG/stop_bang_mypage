@@ -125,15 +125,12 @@ module.exports = {
             .publicUrl();
         }
 
-        console.log(response.agentMainInfo);
-
         // 초기화
         response.agentRating = 0;
         response.tagsData = null;
         response.agentReviewData = [];
         response.report = [];
         response.statistics = null;
-        // console.log(profileRes.body[0]);
         if (profileRes == undefined) return res.json({});
         else if (profileRes.body[0].a_username != a_username)
           return res.json({});
@@ -261,7 +258,6 @@ module.exports = {
                               } else {
                                 console.log("신고 정보를 가져올 수 없음");
                               }
-                              return res.json(response); // 모든 작업이 완료된 후에 응답을 보냄
                             }
                           );
                         }
