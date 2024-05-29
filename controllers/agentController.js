@@ -235,29 +235,42 @@ module.exports = {
 
 
         // [start] 신고 7회 이상인지 확인
-        const queryParams = reviewIds.join('&rv_id=');
-        const reportCheckOptions = {
-            host: "stop_bang_review",
-            port: process.env.PORT,
-            path: `/review/reportCheck?rv_id=${queryParams}`,
-            method: "GET",
-            headers: {
-            "Content-Type": "application/json",
-            },
-        };
-        const reportCheckRes = await httpRequest(reportCheckOptions);
+        // const queryParams = reviewIds.join('/');
+        // console.log("queryParams: ", queryParams);
+        
+        
         // 각 후기 객체에 대한 신고 횟수를 확인하고 추가
         for (let i = 0; i < response.agentReviewData.length; i++) {
             const review = response.agentReviewData[i];
-            if (review.rv_id === reportCheckRes.body.rv_id) {
-                review.check_repo = reportCheckRes.body.result;
-                console.log("신고 횟수 확인: ", reportCheckRes.body.result);
-                if (reportCheckRes.body.result == 1) {
-                    console.log("🚨신고가 7회 누적되어 더이상 접근할 수 없는 후기입니다.🚨");
-                } else if (reportCheckRes.body.result == 0) {
-                    console.log("신고 7회 이하 후기");
+            const rv_id = review.id;
+
+            const reportCheckOptions = {
+                host: "stop_bang_review",
+                port: process.env.PORT,
+                path: `/review/reportCheck/${rv_id}`,
+                method: "GET",
+                headers: {
+                "Content-Type": "application/json",
+                },
+            };
+            
+            try {
+                const reportCheckRes = await httpRequest(reportCheckOptions);
+                if (reportCheckRes) {
+                    const report = reportCheckRes.body;
+                    review.check_repo = report.result;
+                    console.log("신고 횟수 확인: ", report.result);
+                    if (report.result == 1) {
+                        console.log("🚨신고가 7회 누적되어 더이상 접근할 수 없는 후기입니다.🚨");
+                    } else if (report.result == 0) {
+                        console.log("신고 7회 이하 후기");
+                    }
+                } else {
+                    console.log("신고 횟수 확인 실패");
                 }
-            }            
+            } catch (error) {
+                console.error("신고 정보 요청 중 오류 발생:", error);
+            }
         }
         // [end] 신고 7회 이상인지 확인
 
