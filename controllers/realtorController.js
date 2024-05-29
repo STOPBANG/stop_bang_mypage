@@ -5,6 +5,18 @@ const tags = require("../public/assets/tag.js");
 const jwt = require("jsonwebtoken");
 const { httpRequest } = require("../utils/httpRequest.js");
 
+// gcp bucket
+const GCP_PROJECT_ID = process.env.GCP_PROJECT_ID;
+const GCP_KEYFILE_PATH = process.env.GCP_KEYFILE_PATH;
+const GCP_BUCKET_NAME = process.env.GCP_BUCKET_NAME;
+
+const {Storage} = require('@google-cloud/storage');
+const storage = new Storage({
+  projectId: GCP_PROJECT_ID,
+  keyFilename: GCP_KEYFILE_PATH
+});
+const bucket = storage.bucket(GCP_BUCKET_NAME);
+
 const makeStatistics = (reviews) => {
   let array = Array.from({ length: 10 }, () => 0);
   let stArray = new Array(10);
@@ -85,9 +97,9 @@ module.exports = {
       else response.canOpen = 1;
 
       response.direction = `/review/${req.params.sys_regno}/create`;
-      response.report = null;
+      response.report = [];
       response.bookmark = 0;
-      response.openedReviewData = null;
+      response.openedReviewData = [];
       response.review = []
       // 아래 줄 추가
       const ra_regno = req.params.ra_regno;
@@ -112,14 +124,43 @@ module.exports = {
           "Content-Type": "application/json",
         },
       };
-      requestBody = { username: r_username };
 
-      httpRequest(getOptions, requestBody).then((agentPriRes) => {
-        if (agentPriRes.body.length)
+      httpRequest(getOptions).then((agentPriRes) => {
+        if (agentPriRes.body.length){
           response.agentPrivate = agentPriRes.body[0];
+                    
+          /* gcs */
+          if (agentPriRes.body[0].a_profile_image != undefined) {
+            response.agentPrivate.a_profile_image = bucket.file(`agent/${agentPriRes.body[0].a_profile_image}`).publicUrl();
+          }
+          else{
+            response.agentPrivate.a_profile_image = null;
+          }
+
+          if(agentPriRes.body[0].a_image1 != undefined){
+              response.agentPrivate.a_image1 = bucket.file(`agent/${agentPriRes.body[0].a_image1}`).publicUrl();
+          }
+          else{
+            response.agentPrivate.a_image1 = null;
+          }
+
+          if(agentPriRes.body[0].a_image2 != undefined){
+              response.agentPrivate.a_image2 = bucket.file(`agent/${agentPriRes.body[0].a_image2}`).publicUrl();
+          }
+          else{
+            response.agentPrivate.a_image2 = null;
+          }
+
+          if(agentPriRes.body[0].a_image3 != undefined){
+              response.agentPrivate.a_image3 = bucket.file(`agent/${agentPriRes.body[0].a_image3}`).publicUrl();
+          }
+          else{
+            response.agentPrivate.a_image3 = null;
+          }
+        }
         else response.agentPrivate = null;
         // [end] 공인중개사 개인정보 가져오기
-
+        
         response.rating = 0;
         // [start] 리뷰 정보 가져오기
         getReviewOptions = {
@@ -241,8 +282,14 @@ module.exports = {
                   },
                 };
                 httpRequest(getReportOptions).then((reportRes) => {
-                  if (reportRes.body.length)
-                    response.report += reportRes.body[0];
+                  if (reportRes.body) {
+                    console.log("reportRes!!!!!: ", reportRes.body);
+                    response.report.push(reportRes.body); 
+                    console.log("report_rv_id: ", reportRes.body.repo_rv_id);
+                  }
+                  else {
+                    console.log("신고 정보를 가져올 수 없음");
+                }
                 });
               }
               
