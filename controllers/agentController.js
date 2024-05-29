@@ -247,8 +247,8 @@ module.exports = {
                             },
                           };
 
-                          httpRequest(
-                            getReportOptions.then(async (reportRes) => {
+                          httpRequest(getReportOptions).then(
+                            async (reportRes) => {
                               console.log("신고 정보 가져옴, rv_id = ", rv_id);
 
                               if (reportRes.body) {
@@ -262,11 +262,11 @@ module.exports = {
                                 console.log("신고 정보를 가져올 수 없음");
                               }
                               return res.json(response); // 모든 작업이 완료된 후에 응답을 보냄
-                            })
+                            }
                           );
-                          // [end] 신고 7회 이상인지 확인
                         }
                       );
+                      // [end] 신고 7회 이상인지 확인
                     }
                   );
                 } catch (error) {
