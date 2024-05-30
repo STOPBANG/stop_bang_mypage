@@ -53,7 +53,7 @@ module.exports = {
       response.who = req.cookies.userType;
       // resident인 경우
       postResidentOptions = {
-        host: "stop_bang_auth_DB",
+        host: "auth-api",
         port: process.env.PORT,
         path: `/db/resident/findById`,
         method: "POST",
@@ -71,7 +71,7 @@ module.exports = {
       else{
         // agent인 경우 (resident가 아니라면)
         postAgentOptions = {
-          host: "stop_bang_auth_DB",
+          host: "auth-api",
           port: process.env.PORT,
           path: `/db/agent/findById`,
           method: "POST",
@@ -116,7 +116,7 @@ module.exports = {
 
       // [start] 공인중개사 개인정보 가져오기
       getOptions = {
-        host: "stop_bang_auth_DB",
+        host: "auth-api",
         port: process.env.PORT,
         path: `/db/agent/findByRaRegno/${req.params.sys_regno}`,
         method: "GET",
@@ -164,7 +164,7 @@ module.exports = {
         response.rating = 0;
         // [start] 리뷰 정보 가져오기
         getReviewOptions = {
-          host: "stop_bang_review_DB",
+          host: "review-api",
           port: process.env.PORT,
           path: `/db/review/findAllByRegno/${req.params.sys_regno}`,
           method: "GET",
@@ -187,7 +187,7 @@ module.exports = {
               try {
                 // 리뷰를 작성한 사용자의 username 가져오기
                 const postUsernameOPtions = {
-                  host: "stop_bang_auth_DB",
+                  host: "auth-api",
                   port: process.env.PORT,
                   path: `/db/resident/findByPk`,
                   method: "POST",
@@ -200,7 +200,7 @@ module.exports = {
                 review.username=review_username.body[0].r_username;
                 
                 const reportCheckRes = await httpRequest({
-                  host: "stop_bang_review",
+                  host: "review-ms",
                   port: process.env.PORT,
                   path: `/review/reportCheck/${rv_id}`,
                   method: "GET",
@@ -232,7 +232,7 @@ module.exports = {
 
           // [start] 평균 평점 정보 가져오기
           getRatingOptions = {
-            host: "stop_bang_review",
+            host: "review-ms",
             port: process.env.PORT,
             path: `/review/avgRate/${req.params.sys_regno}`,
             method: "GET",
@@ -256,7 +256,7 @@ module.exports = {
           if (response.who == 1) {
             // [start] 북마크 정보 가져오기
             getBookOptions = {
-              host: "stop_bang_sub_DB",
+              host: "sub-api",
               port: process.env.PORT,
               path: `/db/bookmark/findAllByIdnRegno/${r_id}/${req.params.sys_regno}`,
               method: "GET",
@@ -273,7 +273,7 @@ module.exports = {
               // [start] 신고 정보 가져오기
               for (let review of response.review) {
                 getReportOptions = {
-                  host: "stop_bang_sub_DB",
+                  host: "sub-api",
                   port: process.env.PORT,
                   path: `/db/report/findOne/${review.rv_id}/${r_username}`,
                   method: "GET",
@@ -297,7 +297,7 @@ module.exports = {
 
               // [start] 후기 열람 여부 가져오기
               getOpenedReviewOptions = {
-                host: "stop_bang_sub_DB",
+                host: "sub-api",
                 port: process.env.PORT,
                 path: `/db/openedReview/findAllById/${r_id}`,
                 method: "GET",
@@ -347,7 +347,7 @@ module.exports = {
       const rv_id = req.params.rv_id;
 
       postOpenOptions = {
-        host: "stop_bang_sub_DB",
+        host: "sub-api",
         port: process.env.PORT,
         path: `/db/openedReview/create`,
         method: "POST",

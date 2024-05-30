@@ -6,7 +6,7 @@ module.exports = {
     /* msa */
     const user_id = req.headers.id;
     const getOptions = {
-      host: 'stop_bang_review_DB',
+      host: 'review-api',
       port: process.env.PORT,
       path: `/db/review/findAllByUserId/${user_id}`,
       method: 'GET',
@@ -53,7 +53,7 @@ module.exports = {
     /* msa */
     const user_id = req.headers.id;
     const getOptions = {
-      host: 'stop_bang_sub_DB',
+      host: 'sub-api',
       port: process.env.PORT,
       path: `/db/openedReview/findAllById/${user_id}`,
       method: 'GET',
@@ -100,7 +100,7 @@ module.exports = {
   bookmark: (req, res) => {
     /* msa */
     const getOptions = {
-      host: 'stop_bang_sub_DB',
+      host: 'sub-api',
       port: process.env.PORT,
       path: `/db/bookmark/findALLById/${req.headers.id}`,
       method: 'GET',
@@ -145,7 +145,7 @@ module.exports = {
   deleteBookmark: (req, res) => {
     /* msa */
     const postOptions = {
-      host: 'stop_bang_sub_DB',
+      host: 'sub-api',
       port: process.env.PORT,
       path: `/db/bookmark/delete`,
       method: 'POST',
@@ -170,7 +170,7 @@ module.exports = {
   settings: (req, res) => {
     /* msa */
     const postOptions = {
-      host: 'stop_bang_auth_DB',
+      host: 'auth-api',
       port: process.env.PORT,
       path: `/db/resident/findById`,
       method: 'POST',
@@ -197,7 +197,7 @@ module.exports = {
   updateSettings: (req, res) => {
     /* msa */
     const postOptions = {
-      host: 'stop_bang_auth_DB',
+      host: 'auth-api',
       port: process.env.PORT,
       path: `/db/resident/update`,
       method: 'PUT',
@@ -220,7 +220,7 @@ module.exports = {
   updatePassword: (req, res) => {
     /* msa */
     const postOptions = {
-      host: 'stop_bang_auth_DB',
+      host: 'auth-api',
       port: process.env.PORT,
       path: `/db/resident/updatepw`,
       method: 'PUT',
@@ -246,7 +246,7 @@ module.exports = {
     try {
       /* msa */
       const postOptions = {
-        host: 'stop_bang_auth_DB',
+        host: 'auth-api',
         port: process.env.PORT,
         path: `/db/resident/delete`,
         method: 'POST',

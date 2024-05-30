@@ -11,7 +11,7 @@ module.exports = {
     }
     /* msa */
     const postOptions = {
-      host: 'stop_bang_auth_DB',
+      host: 'auth-api',
       port: process.env.PORT,
       path: `/db/agent/findById`,
       method: 'POST',
@@ -37,7 +37,7 @@ module.exports = {
   updateSettings: (req, res) => {
     /* msa */
     const postOptions = {
-      host: 'stop_bang_auth_DB',
+      host: 'auth-api',
       port: process.env.PORT,
       path: `/db/agent/update`,
       method: 'PUT',
@@ -59,7 +59,7 @@ module.exports = {
   updatePassword: (req, res) => {
     /* msa */
     const postOptions = {
-      host: 'stop_bang_auth_DB',
+      host: 'auth-api',
       port: process.env.PORT,
       path: `/db/agent/updatepw`,
       method: 'PUT',
@@ -85,7 +85,7 @@ module.exports = {
     try {
       /* msa */
       const postOptions = {
-        host: 'stop_bang_auth_DB',
+        host: 'auth-api',
         port: process.env.PORT,
         path: `/db/agent/delete`,
         method: 'POST',

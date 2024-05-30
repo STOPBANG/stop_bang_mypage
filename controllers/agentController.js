@@ -73,7 +73,7 @@ module.exports = {
     const response = {};
     try {
         const getProfileOptions = {
-            host: "stop_bang_auth_DB",
+            host: "auth-api",
             port: process.env.PORT,
             path: `/db/agent/findByRaRegno/${sys_regno}`,
             method: "GET",
@@ -140,7 +140,7 @@ module.exports = {
 
         // [start] 리뷰 정보 가져오기
         getReviewOptions = {
-          host: "stop_bang_review_DB",
+          host: "review-api",
           port: process.env.PORT,
           path: `/db/review/findAllByRegno/${req.params.sys_regno}`,
           method: "GET",
@@ -167,7 +167,7 @@ module.exports = {
 
         // [start] 평균 평점 정보 가져오기
         getRatingOptions = {
-            host: "stop_bang_review",
+            host: "review-ms",
             port: process.env.PORT,
             path: `/review/avgRate/${req.params.sys_regno}`,
             method: "GET",
@@ -189,7 +189,7 @@ module.exports = {
 
         // [start] 신고 정보 가져오기
         getReportOptions = {
-            host: "stop_bang_bookmark",
+            host: "bookmark-ms",
             port: process.env.PORT,
             path: `/agent/isReported/${a_username}`,
             method: "GET",
@@ -208,7 +208,7 @@ module.exports = {
 
         // [start] 리뷰를 작성한 사용자의 username 가져오기
         const postUsernameOPtions = {
-            host: "stop_bang_auth_DB",
+            host: "auth-api",
             port: process.env.PORT,
             path: `/db/resident/findByPk`,
             method: "POST",
@@ -245,7 +245,7 @@ module.exports = {
             const rv_id = review.id;
 
             const reportCheckOptions = {
-                host: "stop_bang_review",
+                host: "review-ms",
                 port: process.env.PORT,
                 path: `/review/reportCheck/${rv_id}`,
                 method: "GET",
@@ -285,7 +285,7 @@ module.exports = {
     response = {};
     /* msa */
     const getUpdateMainInfoOptions = {
-      host: "stop_bang_auth_DB",
+      host: "auth-api",
       port: process.env.PORT,
       path: `/db/agent/findByRaRegno/${req.params.sys_regno}`,
       method: "GET",
@@ -306,7 +306,7 @@ module.exports = {
   updatingMainInfo: (req, res, next) => {
     /* msa */
     const putUpdatingMainInfoOptions = {
-      host: "stop_bang_auth_DB",
+      host: "auth-api",
       port: process.env.PORT,
       path: `/db/agent/updateImage`,
       method: "PUT",
@@ -330,7 +330,7 @@ module.exports = {
     response = {};
     /* msa */
     const getUpdateEnteredInfoOptions = {
-      host: "stop_bang_auth_DB",
+      host: "auth-api",
       port: process.env.PORT,
       path: `/db/agent/findByRaRegno/${req.params.sys_regno}`,
       method: "GET",
@@ -351,7 +351,7 @@ module.exports = {
     let body = req.body;
     /* msa */
     const putUpdatingEnteredInfoOptions = {
-      host: "stop_bang_auth_DB",
+      host: "auth-api",
       port: process.env.PORT,
       path: `/db/agent/updateEnteredInfo`,
       method: "PUT",
