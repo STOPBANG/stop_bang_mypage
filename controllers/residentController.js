@@ -61,31 +61,38 @@ module.exports = {
         'Content-Type': 'application/json',
       }
     };
-
-    httpRequest(getOptions)
-      .then(result => {
-        console.log(result.body)
-        if (result === null) {
+    httpRequest(getOptions).then(openReviews => {
+        if (openReviews === null) {
           console.log("error occured: ", err);
         } else {
-          const body = result.body.map(element => {
-            const apiUrl = `http://openapi.seoul.go.kr:8088/${process.env.API_KEY}/json/landBizInfo/1/1/${element.agentList_ra_regno}/`;
-            return fetch(apiUrl)
-              .then(apiResponse => {
-                if (!apiResponse.ok) {
-                  throw new Error(`HTTP error! Status: ${apiResponse.status}`);
-                }
-                return apiResponse.json();
+          const body = openReviews.body.map(async element => {
+            const getReviewOptions = {
+              host: 'review-api',
+              port: process.env.PORT,
+              path: `/db/review/findAllByReviewId/${element.review_rv_id}`,
+              method: 'GET',
+              headers: {
+                'Content-Type': 'application/json',
+              }
+            };
+            let review = await httpRequest(getReviewOptions);
+            const apiUrl = `http://openapi.seoul.go.kr:8088/${process.env.API_KEY}/json/landBizInfo/1/1/${review.body[0].agentList_ra_regno}/`;
+            return await fetch(apiUrl)
+            .then(apiResponse => {
+              if (!apiResponse.ok) {
+                throw new Error(`HTTP error! Status: ${apiResponse.status}`);
+              }
+              return apiResponse.json();
               })
               .then(js => {
                 if (js.landBizInfo && js.landBizInfo.row) {
-                  const row = js.landBizInfo.row[0];
-                  element.cmp_nm = row.CMP_NM;
-                  element.address = row.ADDRESS;
+                const row = js.landBizInfo.row[0];
+                review.body[0].cmp_nm = row.CMP_NM;
+                review.body[0].address = row.ADDRESS;
                 }
-                return element;
+                return review.body[0];
               });
-          })
+          });
           Promise.all(body)
             .then(body => {
               return res.json({
@@ -95,7 +102,7 @@ module.exports = {
               });
             });
         }
-      });
+    });
   },
   bookmark: (req, res) => {
     /* msa */
